@@ -142,25 +142,28 @@ const PlanetOverlay: React.FC<Props> = ({
               <div className="pointer-events-auto bg-black p-4 rounded-xl border border-gray-700 shadow-2xl w-full max-w-3xl relative">
                   <button onClick={() => setShowVideo(false)} className="absolute -top-4 -right-4 bg-red-500 text-white w-8 h-8 rounded-full font-bold z-30 hover:bg-red-600 transition">X</button>
                   <div className="aspect-video w-full bg-gray-900 flex items-center justify-center overflow-hidden rounded-lg">
-                      {/* YouTube Embed with origin fix, rel=0, modestbranding, and playsinline */}
+                      {/* Uses youtube-nocookie domain to help with 'Made for Kids' restrictions */}
                       <iframe 
                         width="100%" 
                         height="100%" 
-                        src={`https://www.youtube.com/embed/${selectedPlanet.youtubeId}?autoplay=1&origin=${window.location.origin}&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1`} 
-                        title="YouTube video player" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        src={`https://www.youtube-nocookie.com/embed/${selectedPlanet.youtubeId}?rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`} 
+                        title={`Video de ${selectedPlanet.name}`}
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen
+                        className="w-full h-full"
                       ></iframe>
                   </div>
                   
-                  <div className="mt-2 text-center">
+                  <div className="mt-2 text-center bg-gray-900/50 p-2 rounded">
+                    <p className="text-gray-400 text-xs mb-1">¿Problemas para ver el video?</p>
                       <a 
                         href={`https://www.youtube.com/watch?v=${selectedPlanet.youtubeId}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-white text-sm underline"
+                        className="inline-block bg-red-600/80 hover:bg-red-600 text-white text-xs px-3 py-1 rounded transition"
                       >
-                        ⚠️ ¿Problemas con el video? Ver directamente en YouTube
+                        Ver directamente en YouTube ↗
                       </a>
                   </div>
 

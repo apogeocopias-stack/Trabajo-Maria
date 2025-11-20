@@ -1,0 +1,95 @@
+import React, { useState } from 'react';
+import { AppPhase, AvatarConfig, QuizResult } from './types';
+import AvatarCreator from './components/AvatarCreator';
+import SolarSystem from './components/SolarSystem';
+import PlanetOverlay from './components/PlanetOverlay';
+import SchoolEnding from './components/SchoolEnding';
+
+const STORAGE_KEY = 'max_aub_avatar_config';
+
+const App: React.FC = () => {
+  // Initialize avatarConfig from localStorage if available
+  const [avatarConfig, setAvatarConfig] = useState<AvatarConfig | null>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      console.error("Failed to load avatar config", e);
+      return null;
+    }
+  });
+
+  // If we have a saved config, skip creation and go straight to Solar System
+  const [phase, setPhase] = useState<AppPhase>(() => {
+    return localStorage.getItem(STORAGE_KEY) ? AppPhase.SOLAR_SYSTEM : AppPhase.AVATAR_CREATION;
+  });
+
+  const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+  
+  const handleAvatarComplete = (config: AvatarConfig) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    } catch (e) {
+      console.error("Failed to save to localStorage (likely quota exceeded)", e);
+    }
+    setAvatarConfig(config);
+    setPhase(AppPhase.SOLAR_SYSTEM);
+  };
+
+  const handleQuizUpdate = (newResults: QuizResult[]) => {
+    setQuizResults(newResults);
+  };
+
+  const handleFinishJourney = () => {
+    setPhase(AppPhase.OUTRO);
+  };
+
+  const handleRestart = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error("Error removing storage", e);
+    }
+    setAvatarConfig(null);
+    setQuizResults([]);
+    setSelectedPlanetId(null);
+    setPhase(AppPhase.AVATAR_CREATION);
+  };
+
+  return (
+    <div className="w-full h-screen overflow-hidden relative">
+      
+      {phase === AppPhase.AVATAR_CREATION && (
+        <AvatarCreator onComplete={handleAvatarComplete} />
+      )}
+
+      {phase === AppPhase.SOLAR_SYSTEM && (
+        <>
+          <SolarSystem 
+            selectedPlanetId={selectedPlanetId} 
+            onPlanetSelect={setSelectedPlanetId}
+          />
+          <PlanetOverlay 
+            selectedPlanetId={selectedPlanetId}
+            onSelectPlanet={setSelectedPlanetId}
+            onQuizComplete={handleQuizUpdate}
+            onFinishJourney={handleFinishJourney}
+            avatarUrl={avatarConfig?.imageUrl}
+          />
+        </>
+      )}
+
+      {phase === AppPhase.OUTRO && avatarConfig && (
+        <SchoolEnding 
+          config={avatarConfig} 
+          results={quizResults} 
+          onRestart={handleRestart}
+        />
+      )}
+
+    </div>
+  );
+};
+
+export default App;

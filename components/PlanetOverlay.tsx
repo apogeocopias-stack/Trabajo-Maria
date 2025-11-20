@@ -142,16 +142,28 @@ const PlanetOverlay: React.FC<Props> = ({
               <div className="pointer-events-auto bg-black p-4 rounded-xl border border-gray-700 shadow-2xl w-full max-w-3xl relative">
                   <button onClick={() => setShowVideo(false)} className="absolute -top-4 -right-4 bg-red-500 text-white w-8 h-8 rounded-full font-bold z-30 hover:bg-red-600 transition">X</button>
                   <div className="aspect-video w-full bg-gray-900 flex items-center justify-center overflow-hidden rounded-lg">
-                      {/* YouTube Embed with origin fix */}
+                      {/* YouTube Embed with origin fix, rel=0, modestbranding, and playsinline */}
                       <iframe 
                         width="100%" 
                         height="100%" 
-                        src={`https://www.youtube.com/embed/${selectedPlanet.youtubeId}?autoplay=1&origin=${window.location.origin}`} 
+                        src={`https://www.youtube.com/embed/${selectedPlanet.youtubeId}?autoplay=1&origin=${window.location.origin}&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1`} 
                         title="YouTube video player" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowFullScreen
                       ></iframe>
                   </div>
+                  
+                  <div className="mt-2 text-center">
+                      <a 
+                        href={`https://www.youtube.com/watch?v=${selectedPlanet.youtubeId}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-white text-sm underline"
+                      >
+                        ⚠️ ¿Problemas con el video? Ver directamente en YouTube
+                      </a>
+                  </div>
+
                   <button 
                     onClick={handleVideoEnd}
                     className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold text-xl shadow-lg transform transition hover:scale-105"

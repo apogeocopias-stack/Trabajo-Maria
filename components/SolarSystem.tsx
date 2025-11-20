@@ -267,9 +267,8 @@ const PlanetMesh: React.FC<PlanetMeshProps> = ({ data, isSelected, isAnySelected
 const CameraController: React.FC<{ 
     selectedPlanetId: string | null, 
     playZoomSound: () => void,
-    ambientAudioRef: React.MutableRefObject<HTMLAudioElement | null>,
     planetRefs: React.MutableRefObject<Record<string, THREE.Object3D>>
-}> = ({ selectedPlanetId, playZoomSound, ambientAudioRef, planetRefs }) => {
+}> = ({ selectedPlanetId, playZoomSound, planetRefs }) => {
     const isTransitioning = useRef(false);
     const prevSelectedId = useRef<string | null>(null);
     
@@ -354,14 +353,6 @@ const CameraController: React.FC<{
             // CRITICAL: We DO NOT update state.camera.position here. 
             // OrbitControls handles position based on user mouse input.
         }
-
-        // Audio Volume Logic
-        if (ambientAudioRef.current) {
-            const targetRate = selectedPlanetId ? 0.8 : 1.0;
-            const targetVolume = selectedPlanetId ? 0.6 : 0.3;
-            ambientAudioRef.current.playbackRate = THREE.MathUtils.lerp(ambientAudioRef.current.playbackRate, targetRate, 0.02);
-            ambientAudioRef.current.volume = THREE.MathUtils.lerp(ambientAudioRef.current.volume, targetVolume, 0.02);
-        }
     });
 
     return null;
@@ -381,13 +372,32 @@ const SolarSystem: React.FC<Props> = ({ selectedPlanetId, onPlanetSelect }) => {
       const ambient = new Audio('https://assets.mixkit.co/active_storage/sfx/2658/2658-preview.mp3'); 
       ambient.loop = true;
       ambient.volume = 0.3;
-      ambient.play().catch(e => {});
       ambientAudioRef.current = ambient;
+      
+      // Only start playing if we are in space initially
+      if (!selectedPlanetId) {
+          ambient.play().catch(e => {});
+      }
+
       return () => {
           ambient.pause();
           ambient.src = "";
       };
   }, []);
+
+  useEffect(() => {
+      const audio = ambientAudioRef.current;
+      if (!audio) return;
+
+      if (selectedPlanetId) {
+          // Stop melody when on a planet
+          audio.pause();
+      } else {
+          // Resume melody when back in space
+          audio.volume = 0.3;
+          audio.play().catch(e => {});
+      }
+  }, [selectedPlanetId]);
 
   const playZoomSound = () => {
       if (!zoomAudioRef.current) {
@@ -430,7 +440,6 @@ const SolarSystem: React.FC<Props> = ({ selectedPlanetId, onPlanetSelect }) => {
         <CameraController 
             selectedPlanetId={selectedPlanetId} 
             playZoomSound={playZoomSound}
-            ambientAudioRef={ambientAudioRef}
             planetRefs={planetRefs}
         />
         

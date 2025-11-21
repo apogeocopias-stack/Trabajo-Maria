@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AvatarConfig } from '../types';
 import { generateAvatarImage } from '../services/geminiService';
@@ -9,10 +10,10 @@ interface Props {
 const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
   const [formData, setFormData] = useState<AvatarConfig>({
     name: '',
-    gender: 'niña',
-    height: 'media',
-    hairColor: 'castaño',
-    hairType: 'liso'
+    gender: 'nena',
+    height: 'mitjana',
+    hairColor: 'castany',
+    hairType: 'llis'
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
 
   const handleGenerate = async () => {
     if (!formData.name) {
-      setError("¡Por favor escribe un nombre!");
+      setError("Si us plau, escriu un nom!");
       return;
     }
     setIsLoading(true);
@@ -30,10 +31,10 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
       if (imageUrl) {
         setGeneratedImage(imageUrl);
       } else {
-        setError("No se pudo generar la imagen. Inténtalo de nuevo.");
+        setError("No s'ha pogut generar la imatge. Torna-ho a provar.");
       }
     } catch (e) {
-      setError("Hubo un error conectando con Nano Banana. Verifica tu API Key.");
+      setError("Hi ha hagut un error connectant amb la IA. Verifica la teva clau API.");
     } finally {
       setIsLoading(false);
     }
@@ -49,80 +50,80 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-900 via-purple-900 to-black p-4">
       <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 w-full max-w-2xl border border-white/20 shadow-2xl">
         <h1 className="text-4xl font-bold text-center mb-2 text-yellow-300 space-font">
-          Misión Espacial: Max Aub
+          Missió Espacial: Max Aub
         </h1>
         <p className="text-center text-indigo-200 mb-8 text-xl">
-          Configura tu astronauta
+          Configura el teu astronauta
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Form */}
           <div className="space-y-4">
             <div>
-              <label className="block text-indigo-100 mb-1">Nombre</label>
+              <label className="block text-indigo-100 mb-1">Nom</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                placeholder="Tu nombre"
+                placeholder="El teu nom"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-indigo-100 mb-1">Género</label>
+                <label className="block text-indigo-100 mb-1">Gènere</label>
                 <select
                   value={formData.gender}
-                  onChange={(e) => setFormData({...formData, gender: e.target.value as 'niño'|'niña'})}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value as 'nen'|'nena'})}
                   className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
                 >
-                  <option value="niña">Niña</option>
-                  <option value="niño">Niño</option>
+                  <option value="nena">Nena</option>
+                  <option value="nen">Nen</option>
                 </select>
               </div>
               <div>
-                <label className="block text-indigo-100 mb-1">Altura</label>
+                <label className="block text-indigo-100 mb-1">Alçada</label>
                 <select
                   value={formData.height}
                   onChange={(e) => setFormData({...formData, height: e.target.value})}
                   className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
                 >
                   <option value="alta">Alta</option>
-                  <option value="media">Media</option>
-                  <option value="baja">Baja</option>
+                  <option value="mitjana">Mitjana</option>
+                  <option value="baixa">Baixa</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-indigo-100 mb-1">Color de pelo</label>
+                <label className="block text-indigo-100 mb-1">Color de cabell</label>
                 <select
                   value={formData.hairColor}
                   onChange={(e) => setFormData({...formData, hairColor: e.target.value})}
                   className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
                 >
-                  <option value="rubio">Rubio</option>
-                  <option value="castaño">Castaño</option>
-                  <option value="negro">Negro</option>
-                  <option value="pelirrojo">Pelirrojo</option>
-                  <option value="azul fantasía">Azul</option>
-                  <option value="rosa fantasía">Rosa</option>
+                  <option value="ros">Ros</option>
+                  <option value="castany">Castany</option>
+                  <option value="negre">Negre</option>
+                  <option value="pèl-roig">Pèl-roig</option>
+                  <option value="blau fantasia">Blau</option>
+                  <option value="rosa fantasia">Rosa</option>
                 </select>
               </div>
               <div>
-                <label className="block text-indigo-100 mb-1">Tipo de pelo</label>
+                <label className="block text-indigo-100 mb-1">Tipus de cabell</label>
                 <select
                   value={formData.hairType}
                   onChange={(e) => setFormData({...formData, hairType: e.target.value})}
                   className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
                 >
-                  <option value="liso">Liso</option>
-                  <option value="rizado">Rizado</option>
-                  <option value="ondulado">Ondulado</option>
-                  <option value="corto">Corto</option>
-                  <option value="coletas">Coletas</option>
+                  <option value="llis">Llis</option>
+                  <option value="arrissat">Arrissat</option>
+                  <option value="ondulat">Ondulat</option>
+                  <option value="curt">Curt</option>
+                  <option value="cues">Cues</option>
                 </select>
               </div>
             </div>
@@ -133,7 +134,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                 disabled={isLoading}
                 className="w-full mt-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-indigo-900 font-bold py-3 rounded-xl hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-orange-500/20"
               >
-                {isLoading ? 'Generando con Nano Banana...' : 'Crear Avatar'}
+                {isLoading ? 'Generant amb Nano Banana...' : 'Crear Avatar'}
               </button>
             )}
           </div>
@@ -148,7 +149,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
               ) : (
                 <div className="text-indigo-300 text-center p-4">
                   <span className="text-4xl block mb-2">👩‍🚀</span>
-                  Tu avatar aparecerá aquí
+                  El teu avatar apareixerà aquí
                 </div>
               )}
             </div>
@@ -164,7 +165,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                 onClick={handleStartMission}
                 className="mt-8 w-full bg-gradient-to-r from-green-400 to-emerald-600 text-white font-bold py-3 rounded-xl hover:scale-105 transition-transform shadow-lg shadow-green-500/20 animate-bounce"
               >
-                ¡Despegar al Espacio! 🚀
+                Enlairament a l'Espai! 🚀
               </button>
             )}
           </div>

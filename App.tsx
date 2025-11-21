@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AppPhase, AvatarConfig, QuizResult } from './types';
 import AvatarCreator from './components/AvatarCreator';
@@ -76,6 +77,7 @@ const App: React.FC = () => {
             onQuizComplete={handleQuizUpdate}
             onFinishJourney={handleFinishJourney}
             avatarUrl={avatarConfig?.imageUrl}
+            pilotName={avatarConfig?.name}
           />
         </>
       )}

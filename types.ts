@@ -1,3 +1,4 @@
+
 export enum AppPhase {
   AVATAR_CREATION = 'AVATAR_CREATION',
   SOLAR_SYSTEM = 'SOLAR_SYSTEM',
@@ -6,7 +7,7 @@ export enum AppPhase {
 
 export interface AvatarConfig {
   name: string;
-  gender: 'niño' | 'niña';
+  gender: 'nen' | 'nena';
   height: string;
   hairColor: string;
   hairType: string;
@@ -34,6 +35,11 @@ export interface PlanetData {
   ringTextureUrl?: string; // New field for realistic rings
   description: string;
   youtubeId: string; // Placeholder for video ID
+  
+  // New engaging texts
+  videoText: string;
+  quizText: string;
+
   quiz: Question[];
   externalQuizUrl?: string; // New field for NotebookLM or external links
   moons: number;

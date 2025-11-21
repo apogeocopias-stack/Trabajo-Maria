@@ -1,14 +1,41 @@
+
 import { GoogleGenAI, Modality } from "@google/genai";
 import { AvatarConfig } from '../types';
 
-const apiKey = process.env.API_KEY || '';
+// Safely access process.env to avoid ReferenceError in some browser environments
+const apiKey = (typeof process !== 'undefined' && process.env && process.env.API_KEY) || '';
 
 const ai = new GoogleGenAI({ apiKey });
 
+// Translation maps to convert Catalan UI values to English for the Prompt
+const TRANSLATIONS: Record<string, string> = {
+  'nen': 'boy',
+  'nena': 'girl',
+  'ros': 'blonde',
+  'castany': 'brown',
+  'negre': 'black',
+  'pèl-roig': 'red',
+  'blau fantasia': 'blue fantasy',
+  'rosa fantasia': 'pink fantasy',
+  'llis': 'straight',
+  'arrissat': 'curly',
+  'ondulat': 'wavy',
+  'curt': 'short',
+  'cues': 'pigtails',
+};
+
+const translate = (text: string): string => {
+  return TRANSLATIONS[text.toLowerCase()] || text;
+};
+
 export const generateAvatarImage = async (config: AvatarConfig): Promise<string | null> => {
   try {
-    const prompt = `A cute Studio Ghibli style illustration of a 9 year old ${config.gender} astronaut named ${config.name}. 
-    The child has ${config.hairColor} hair that is ${config.hairType}. 
+    const genderEn = translate(config.gender);
+    const hairColorEn = translate(config.hairColor);
+    const hairTypeEn = translate(config.hairType);
+
+    const prompt = `A cute Studio Ghibli style illustration of a 9 year old ${genderEn} astronaut named ${config.name}. 
+    The child has ${hairColorEn} hair that is ${hairTypeEn}. 
     They are wearing a white astronaut suit but NO helmet. Their head is visible. 
     Happy, adventurous expression. Clean white or simple pastel background. High quality anime style art.`;
 
@@ -39,9 +66,13 @@ export const generateAvatarImage = async (config: AvatarConfig): Promise<string 
 
 export const generateOutroImage = async (config: AvatarConfig): Promise<string | null> => {
   try {
-    const prompt = `A cute Studio Ghibli style illustration of a 9 year old ${config.gender} astronaut named ${config.name} 
-    (same character: ${config.hairColor}, ${config.hairType} hair, astronaut suit without helmet).
-    The child is standing in front of a school gate. There is a sign on the gate that says "COLEGIO MAX AUB".
+    const genderEn = translate(config.gender);
+    const hairColorEn = translate(config.hairColor);
+    const hairTypeEn = translate(config.hairType);
+
+    const prompt = `A cute Studio Ghibli style illustration of a 9 year old ${genderEn} astronaut named ${config.name} 
+    (same character: ${hairColorEn}, ${hairTypeEn} hair, astronaut suit without helmet).
+    The child is standing in front of a school gate. There is a sign on the gate that says "COL·LEGI MAX AUB".
     The child is surrounded by other happy diverse children in normal clothes.
     The astronaut child is waving goodbye. Warm, sunset lighting, nostalgic but happy atmosphere.`;
 

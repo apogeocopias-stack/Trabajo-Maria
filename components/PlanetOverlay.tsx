@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Question, QuizResult } from '../types';
 import { PLANETS } from '../constants';
@@ -8,6 +9,7 @@ interface Props {
   onQuizComplete: (results: QuizResult[]) => void;
   onFinishJourney: () => void;
   avatarUrl?: string;
+  pilotName?: string;
 }
 
 const PlanetOverlay: React.FC<Props> = ({ 
@@ -16,8 +18,8 @@ const PlanetOverlay: React.FC<Props> = ({
   onQuizComplete,
   onFinishJourney,
   avatarUrl,
+  pilotName
 }) => {
-  const [showVideo, setShowVideo] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizIndex, setQuizIndex] = useState(0);
   const [localResults, setLocalResults] = useState<QuizResult[]>([]);
@@ -26,18 +28,29 @@ const PlanetOverlay: React.FC<Props> = ({
 
   useEffect(() => {
     // Reset local state when planet changes
-    setShowVideo(false);
     setShowQuiz(false);
     setQuizIndex(0);
   }, [selectedPlanetId]);
 
   const handleVideoClick = () => {
-    setShowVideo(true);
+    if (!selectedPlanet) return;
+    // Open YouTube in a new tab
+    const url = `https://www.youtube.com/watch?v=${selectedPlanet.youtubeId}`;
+    window.open(url, '_blank');
   };
 
-  const handleVideoEnd = () => {
-    setShowVideo(false);
-    setShowQuiz(true);
+  const handleMissionClick = () => {
+    if (!selectedPlanet) return;
+    
+    if (selectedPlanet.externalQuizUrl) {
+        // If external quiz (NotebookLM), open in new tab
+        window.open(selectedPlanet.externalQuizUrl, '_blank');
+        // Also show the internal validation quiz
+        setShowQuiz(true);
+    } else {
+        // If internal quiz only
+        setShowQuiz(true);
+    }
   };
 
   const handleAnswer = (optionIndex: number) => {
@@ -51,17 +64,17 @@ const PlanetOverlay: React.FC<Props> = ({
         correct: isCorrect
     };
 
-    // Save result logic (simplified)
+    // Save result logic
     const updatedResults = [...localResults, newResult];
     setLocalResults(updatedResults);
-    onQuizComplete(updatedResults); // Propagate up
+    onQuizComplete(updatedResults); 
 
     // Check if there are more questions or finish
     if (quizIndex < selectedPlanet.quiz.length - 1) {
         setQuizIndex(quizIndex + 1);
     } else {
-        // Quiz finished for this planet
-        alert(isCorrect ? "¡Correcto! 🎉" : "¡Casi! 😅");
+        // Quiz finished
+        alert(isCorrect ? "Missió Complerta! 🎉 Has guanyat la teva insígnia." : "Gairebé! 😅 Segueix explorant.");
         setShowQuiz(false);
         onSelectPlanet(null); // Zoom out
     }
@@ -72,22 +85,22 @@ const PlanetOverlay: React.FC<Props> = ({
     return (
       <div className="absolute top-0 left-0 h-full w-64 p-4 z-10 pointer-events-none">
         <div className="flex flex-col gap-2 pointer-events-auto mt-20">
-           <div className="bg-indigo-900/80 backdrop-blur p-4 rounded-xl border border-indigo-500 mb-4 flex items-center gap-3">
+           <div className="bg-indigo-900/80 backdrop-blur p-4 rounded-xl border border-indigo-500 mb-4 flex items-center gap-3 shadow-lg">
               {avatarUrl && <img src={avatarUrl} className="w-12 h-12 rounded-full border-2 border-yellow-400" alt="Avatar" />}
               <div>
-                  <p className="text-xs text-indigo-300">Piloto</p>
-                  <p className="font-bold text-white">Explorando...</p>
+                  <p className="text-xs text-indigo-300">Pilot</p>
+                  <p className="font-bold text-white capitalize">{pilotName || 'Explorant...'}</p>
               </div>
            </div>
 
-          <h3 className="text-yellow-400 font-bold space-font text-lg mb-2 drop-shadow-md">Destinos</h3>
+          <h3 className="text-yellow-400 font-bold space-font text-lg mb-2 drop-shadow-md">Destinacions</h3>
           {PLANETS.map(planet => (
             <button
               key={planet.id}
               onClick={() => onSelectPlanet(planet.id)}
               className="bg-black/50 hover:bg-indigo-600/80 text-white p-3 rounded-lg text-left border border-white/10 transition-all flex items-center gap-3 group"
             >
-               <div className="w-4 h-4 rounded-full" style={{backgroundColor: planet.color}}></div>
+               <div className="w-4 h-4 rounded-full border border-white/20" style={{backgroundColor: planet.color}}></div>
                {planet.name}
             </button>
           ))}
@@ -96,7 +109,7 @@ const PlanetOverlay: React.FC<Props> = ({
             onClick={onFinishJourney}
             className="mt-8 bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg font-bold border-2 border-red-400 shadow-lg animate-pulse"
           >
-            🏠 Vuelta a Casa
+            🏠 Tornar a Casa
           </button>
         </div>
       </div>
@@ -107,111 +120,111 @@ const PlanetOverlay: React.FC<Props> = ({
   const isExternalQuiz = !!selectedPlanet.externalQuizUrl;
 
   return (
-    <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-8">
-      {/* Header Info */}
-      <div className="flex justify-between items-start pointer-events-auto">
-        <button 
+    <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-6 md:p-8">
+      {/* Navigation */}
+      <div className="pointer-events-auto">
+         <button 
             onClick={() => onSelectPlanet(null)}
-            className="bg-white/10 backdrop-blur hover:bg-white/20 text-white px-6 py-2 rounded-full border border-white/30"
+            className="bg-white/10 backdrop-blur hover:bg-white/20 text-white px-6 py-2 rounded-full border border-white/30 shadow-lg"
         >
-            ← Volver al espacio
+            ← Tornar a l'espai
         </button>
-        
-        <div className="bg-black/70 backdrop-blur p-6 rounded-2xl max-w-md text-right border-r-4 shadow-[0_0_30px_rgba(0,0,0,0.5)]" style={{borderColor: selectedPlanet.color}}>
-            <h1 className="text-4xl font-bold space-font mb-2" style={{color: selectedPlanet.color}}>{selectedPlanet.name}</h1>
-            <p className="text-gray-200 mb-4 text-lg leading-relaxed">{selectedPlanet.description}</p>
-            
-            <div className="flex gap-2 justify-end flex-wrap">
-               {!showVideo && !showQuiz && (
-                 <button 
-                    onClick={handleVideoClick}
-                    className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-6 py-2 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center gap-2"
-                 >
-                    <span>▶️</span> Ver Video
-                 </button>
-               )}
-            </div>
-        </div>
       </div>
 
-      {/* Content Modal (Video or Quiz) */}
-      {/* Changed from pointer-events-auto to pointer-events-none for the container, 
-          and added pointer-events-auto to children to allow clicks only on content */}
-      <div className="pointer-events-none flex justify-center items-center flex-grow">
-          {showVideo && (
-              <div className="pointer-events-auto bg-black p-4 rounded-xl border border-gray-700 shadow-2xl w-full max-w-3xl relative">
-                  <button onClick={() => setShowVideo(false)} className="absolute -top-4 -right-4 bg-red-500 text-white w-8 h-8 rounded-full font-bold z-30 hover:bg-red-600 transition">X</button>
-                  <div className="aspect-video w-full bg-gray-900 flex items-center justify-center overflow-hidden rounded-lg">
-                      {/* Uses youtube-nocookie domain to help with 'Made for Kids' restrictions */}
-                      <iframe 
-                        width="100%" 
-                        height="100%" 
-                        src={`https://www.youtube-nocookie.com/embed/${selectedPlanet.youtubeId}?rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`} 
-                        title={`Video de ${selectedPlanet.name}`}
-                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                        className="w-full h-full"
-                      ></iframe>
-                  </div>
-                  
-                  <div className="mt-2 text-center bg-gray-900/50 p-2 rounded">
-                    <p className="text-gray-400 text-xs mb-1">¿Problemas para ver el video?</p>
-                      <a 
-                        href={`https://www.youtube.com/watch?v=${selectedPlanet.youtubeId}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-block bg-red-600/80 hover:bg-red-600 text-white text-xs px-3 py-1 rounded transition"
-                      >
-                        Ver directamente en YouTube ↗
-                      </a>
-                  </div>
+      {/* Right Panel - Info & Missions */}
+      <div className="flex flex-col items-end pointer-events-none mt-4 h-full justify-center">
+        
+        {/* Planet Info Card */}
+        <div className="pointer-events-auto bg-black/80 backdrop-blur-md p-6 rounded-3xl max-w-md text-right border-r-4 shadow-[0_0_50px_rgba(0,0,0,0.6)] mb-6" style={{borderColor: selectedPlanet.color}}>
+            <h1 className="text-5xl font-bold space-font mb-2" style={{color: selectedPlanet.color}}>
+                {selectedPlanet.name}
+            </h1>
+            <p className="text-gray-200 text-lg leading-relaxed border-t border-white/10 pt-4 mt-2">
+                {selectedPlanet.description}
+            </p>
+        </div>
 
-                  <button 
-                    onClick={handleVideoEnd}
-                    className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold text-xl shadow-lg transform transition hover:scale-105"
-                  >
-                      ¡Ya lo he visto! Ir a las preguntas
-                  </button>
+        {/* Mission Control Cards */}
+        {!showQuiz && (
+           <div className="pointer-events-auto flex flex-col gap-4 max-w-md w-full">
+              
+              {/* Video Mission */}
+              <div 
+                 onClick={handleVideoClick}
+                 className="group cursor-pointer bg-gradient-to-r from-orange-900/90 to-red-900/90 backdrop-blur border-2 border-orange-500/30 hover:border-orange-400 p-4 rounded-2xl transition-all transform hover:scale-105 hover:shadow-[0_0_30px_rgba(249,115,22,0.4)]"
+              >
+                  <div className="flex items-center gap-3 mb-2">
+                      <span className="text-3xl">📺</span>
+                      <h3 className="text-orange-300 font-bold space-font text-sm uppercase tracking-wider">Transmissió Entrant</h3>
+                  </div>
+                  <p className="text-white font-medium text-lg mb-2">{selectedPlanet.videoText}</p>
+                  <div className="text-xs text-orange-300 uppercase font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform">
+                      Veure vídeo a YouTube ➜
+                  </div>
               </div>
-          )}
 
+              {/* Quiz Mission */}
+              <div 
+                 onClick={handleMissionClick}
+                 className="group cursor-pointer bg-gradient-to-r from-indigo-900/90 to-blue-900/90 backdrop-blur border-2 border-indigo-500/30 hover:border-indigo-400 p-4 rounded-2xl transition-all transform hover:scale-105 hover:shadow-[0_0_30px_rgba(99,102,241,0.4)]"
+              >
+                  <div className="flex items-center gap-3 mb-2">
+                      <span className="text-3xl">📝</span>
+                      <h3 className="text-indigo-300 font-bold space-font text-sm uppercase tracking-wider">Repte de Cadet</h3>
+                  </div>
+                  <p className="text-white font-medium text-lg mb-2">{selectedPlanet.quizText}</p>
+                  <div className="text-xs text-indigo-300 uppercase font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform">
+                      {isExternalQuiz ? 'Obrir NotebookLM i Verificar' : 'Iniciar Test'} ➜
+                  </div>
+              </div>
+
+           </div>
+        )}
+      </div>
+
+      {/* Quiz Overlay (Centered) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {showQuiz && (
-              <div className="pointer-events-auto bg-indigo-900/90 backdrop-blur-lg p-8 rounded-2xl border-2 border-indigo-400 shadow-2xl w-full max-w-2xl">
-                  <h2 className="text-2xl font-bold text-center mb-6 space-font text-white">
-                      Pregunta sobre {selectedPlanet.name}
+              <div className="pointer-events-auto bg-indigo-950/95 backdrop-blur-xl p-8 rounded-3xl border-2 border-yellow-400 shadow-[0_0_100px_rgba(79,70,229,0.6)] w-full max-w-2xl m-4 relative">
+                  <button 
+                    onClick={() => setShowQuiz(false)}
+                    className="absolute top-4 right-4 text-indigo-300 hover:text-white"
+                  >
+                    ✕ Tancar
+                  </button>
+
+                  <h2 className="text-3xl font-bold text-center mb-2 space-font text-yellow-400">
+                      Informe de Missió: {selectedPlanet.name}
                   </h2>
+                  <div className="h-1 w-32 bg-indigo-500 mx-auto rounded-full mb-8"></div>
                   
                   {isExternalQuiz && (
-                    <div className="mb-8 bg-blue-900/50 p-4 rounded-xl border border-blue-400/50 text-center">
-                       <p className="text-lg text-blue-200 mb-4">
-                         Para completar esta misión, debes resolver el cuestionario interactivo en NotebookLM.
-                       </p>
-                       <a 
-                         href={selectedPlanet.externalQuizUrl} 
-                         target="_blank" 
-                         rel="noopener noreferrer"
-                         className="inline-block bg-white text-blue-900 font-bold px-6 py-3 rounded-full hover:scale-105 transition-transform shadow-lg"
-                       >
-                         🚀 Abrir Cuestionario NotebookLM
-                       </a>
-                       <p className="text-xs text-blue-300 mt-2">Se abrirá en una nueva pestaña</p>
+                    <div className="mb-8 bg-black/30 p-4 rounded-xl border border-indigo-400/30 flex items-center gap-4">
+                       <div className="text-4xl">🤖</div>
+                       <div>
+                           <p className="text-sm text-indigo-200 mb-1">Pas 1: Missió Externa</p>
+                           <p className="text-white font-bold">Ja has completat el test a la pestanya que s'ha obert?</p>
+                           <a href={selectedPlanet.externalQuizUrl} target="_blank" rel="noreferrer" className="text-xs text-yellow-400 hover:underline mt-1 block">
+                               (Obrir de nou si s'ha tancat)
+                           </a>
+                       </div>
                     </div>
                   )}
 
-                  <div className="mb-8">
-                      <p className="text-xl text-center font-medium text-indigo-100">
-                          {isExternalQuiz ? "Verificación de Misión: ¿Lograste completar el cuestionario correctamente?" : selectedPlanet.quiz[quizIndex].text}
+                  <div className="mb-8 text-center">
+                      <p className="text-2xl font-bold text-white mb-2">
+                          {selectedPlanet.quiz[quizIndex].text}
                       </p>
                   </div>
 
-                  <div className="grid gap-4">
+                  <div className="grid gap-3">
                       {selectedPlanet.quiz[quizIndex].options.map((option, idx) => (
                           <button
                             key={idx}
                             onClick={() => handleAnswer(idx)}
-                            className={`bg-white/10 hover:bg-white/30 text-left p-4 rounded-xl border border-white/20 transition-all text-lg font-medium hover:border-yellow-400 focus:ring-2 focus:ring-yellow-400 ${isExternalQuiz && idx === 0 ? 'bg-green-600/20 border-green-500/50 hover:bg-green-600/40' : ''}`}
+                            className="bg-white/5 hover:bg-indigo-600 text-left px-6 py-4 rounded-xl border border-indigo-500/30 transition-all text-lg font-medium hover:scale-102 hover:shadow-lg hover:border-yellow-400 group"
                           >
+                              <span className="inline-block w-8 font-bold text-indigo-400 group-hover:text-white">{String.fromCharCode(65 + idx)}.</span>
                               {option}
                           </button>
                       ))}

@@ -1,111 +1,279 @@
+
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars, Html, Outlines } from '@react-three/drei';
+import { OrbitControls, Stars, Html, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 import { PLANETS } from '../constants';
 import { PlanetData } from '../types';
+
+// Add type definitions for React Three Fiber elements
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      group: any;
+      mesh: any;
+      sphereGeometry: any;
+      meshStandardMaterial: any;
+      meshBasicMaterial: any;
+      ringGeometry: any;
+      ambientLight: any;
+      pointLight: any;
+      color: any;
+    }
+  }
+}
 
 interface Props {
   selectedPlanetId: string | null;
   onPlanetSelect: (id: string) => void;
 }
 
-// --- Procedural Texture Generation ---
-// Creates consistent, crisp vector-style textures in memory without external URLs
+// --- Advanced Procedural Texture Generation ---
+
+const createRingTexture = (id: string): THREE.Texture => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 64; // 1D gradient essentially
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return new THREE.Texture();
+
+    const w = 512;
+    const h = 64;
+    
+    // Radial gradient logic simulated linearly for the ring mapping
+    const grad = ctx.createLinearGradient(0, 0, w, 0);
+    
+    if (id === 'saturn') {
+        grad.addColorStop(0.0, 'rgba(244, 208, 63, 0)'); // Inner gap
+        grad.addColorStop(0.1, 'rgba(244, 208, 63, 0.6)'); 
+        grad.addColorStop(0.3, 'rgba(244, 208, 63, 0.8)');
+        grad.addColorStop(0.5, 'rgba(244, 208, 63, 0.1)'); // Cassini division (gap)
+        grad.addColorStop(0.55, 'rgba(212, 172, 13, 0.7)');
+        grad.addColorStop(1.0, 'rgba(183, 149, 11, 0)'); // Outer fade
+    } else {
+        // Uranus - Pale, thin rings
+        grad.addColorStop(0.0, 'rgba(200, 230, 255, 0)');
+        grad.addColorStop(0.4, 'rgba(200, 230, 255, 0.2)');
+        grad.addColorStop(0.5, 'rgba(200, 230, 255, 0.1)'); // Gap
+        grad.addColorStop(0.6, 'rgba(200, 230, 255, 0.2)');
+        grad.addColorStop(1.0, 'rgba(200, 230, 255, 0)');
+    }
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,w,h);
+
+    // Add noise (dust)
+    for(let i=0; i<500; i++) {
+        ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.2})`;
+        ctx.fillRect(Math.random()*w, 0, 1, h);
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.rotation = Math.PI / 2; 
+    texture.center.set(0.5, 0.5);
+    return texture;
+}
 
 const createPlanetTexture = (type: string, colorHex: string, id: string): THREE.Texture => {
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 512;
+  canvas.width = 1024;
+  canvas.height = 512; // 2:1 Aspect Ratio for sphere mapping
   const ctx = canvas.getContext('2d');
   if (!ctx) return new THREE.Texture();
 
-  const baseColor = new THREE.Color(colorHex);
+  const width = 1024;
+  const height = 512;
   
-  // Background
+  // Helper function for noise
+  const noise = (scale: number) => (Math.random() * scale) - (scale / 2);
+
+  // Helper to draw irregular shapes (continents/patches)
+  const drawIrregularShape = (cx: number, cy: number, avgRadius: number, color: string, roughness: number = 0.4) => {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    const points = 12;
+    for(let i=0; i<=points; i++) {
+        const angle = (i / points) * Math.PI * 2;
+        const r = avgRadius * (1 - roughness/2 + Math.random() * roughness);
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i===0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  // Base Fill defaults
   ctx.fillStyle = colorHex;
-  ctx.fillRect(0, 0, 512, 512);
+  ctx.fillRect(0, 0, width, height);
 
   if (id === 'sun') {
-      // Bright radiant center
-      const grad = ctx.createRadialGradient(256,256, 100, 256,256, 500);
-      grad.addColorStop(0, '#ffffff');
-      grad.addColorStop(0.2, '#FDB813');
-      grad.addColorStop(1, '#e67e22');
+      // Fiery Sun
+      const grad = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width);
+      grad.addColorStop(0, '#FFF176');
+      grad.addColorStop(0.2, '#F57F17');
+      grad.addColorStop(0.8, '#BF360C');
       ctx.fillStyle = grad;
-      ctx.fillRect(0,0,512,512);
+      ctx.fillRect(0,0,width,height);
+      
+      // Plasma turbulence
+      for(let i=0; i<200; i++) {
+        ctx.fillStyle = `rgba(255, 200, 0, ${Math.random() * 0.4})`;
+        const s = Math.random() * 80 + 10;
+        ctx.beginPath();
+        ctx.arc(Math.random()*width, Math.random()*height, s, 0, Math.PI*2);
+        ctx.fill();
+      }
   }
-  else if (type === 'gaseous') {
-      // Stripes
-      const darker = baseColor.clone().multiplyScalar(0.8).getStyle();
-      const lighter = baseColor.clone().offsetHSL(0,0,0.1).getStyle();
-      
-      for(let i=0; i<10; i++) {
-          ctx.fillStyle = i % 2 === 0 ? darker : lighter;
-          const y = (i * 50) + (Math.random() * 10);
-          const h = 40 + Math.random() * 20;
-          ctx.fillRect(0, y, 512, h);
-      }
-      
-      // Storm (Jupiter spot)
-      if (id === 'jupiter') {
+  else if (id === 'jupiter') {
+      // Jupiter: Turbulence and Bands
+      const bands = [
+          { y: 0.1, color: '#6D4C41', width: 40 },
+          { y: 0.3, color: '#D7CCC8', width: 60 },
+          { y: 0.45, color: '#8D6E63', width: 50 },
+          { y: 0.6, color: '#EFEBE9', width: 40 },
+          { y: 0.8, color: '#5D4037', width: 50 },
+      ];
+
+      // Draw bands with waviness
+      bands.forEach(band => {
+          const yBase = band.y * height;
+          ctx.fillStyle = band.color;
           ctx.beginPath();
-          ctx.fillStyle = '#c0392b';
-          ctx.ellipse(350, 350, 60, 40, 0, 0, Math.PI*2);
+          ctx.moveTo(0, yBase);
+          for (let x = 0; x <= width; x+=20) {
+              const wave = Math.sin(x * 0.02) * 15 + noise(10);
+              ctx.lineTo(x, yBase + wave);
+          }
+          ctx.lineTo(width, yBase + band.width);
+          for (let x = width; x >= 0; x-=20) {
+             const wave = Math.sin(x * 0.02) * 15 + noise(10);
+             ctx.lineTo(x, yBase + band.width + wave);
+          }
           ctx.fill();
+      });
+      
+      // Great Red Spot
+      ctx.fillStyle = '#8D6E63';
+      ctx.beginPath();
+      ctx.ellipse(width * 0.7, height * 0.6, 80, 50, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = '#5D4037';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+  }
+  else if (id === 'saturn') {
+      // Saturn: Smooth Gold/Cream Gradients
+      const grad = ctx.createLinearGradient(0, 0, 0, height);
+      grad.addColorStop(0, '#C8A355'); // Darker gold top
+      grad.addColorStop(0.2, '#F4D03F'); // Gold
+      grad.addColorStop(0.5, '#FCF3CF'); // Cream equator
+      grad.addColorStop(0.8, '#F4D03F');
+      grad.addColorStop(1, '#C8A355');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,width,height);
+
+      // Subtle bands
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      for(let y=0; y<height; y+=10) {
+          if (Math.random() > 0.5) {
+              ctx.fillRect(0, y, width, 2);
+          }
       }
-  } else if (type === 'rocky') {
-      // Craters / Continents
-      const darker = baseColor.clone().multiplyScalar(0.7).getStyle();
-      const lighter = baseColor.clone().offsetHSL(0,0,0.15).getStyle();
+  }
+  else if (id === 'earth') {
+      // REBOOTED EARTH: Super Clean, No atmospheric noise
+      // 1. Solid Ocean Base
+      ctx.fillStyle = '#1565C0'; // Deep blue
+      ctx.fillRect(0,0,width,height);
       
-      ctx.fillStyle = darker;
-      
-      // Draw random craters/blobs
-      for(let i=0; i<15; i++) {
-         const x = Math.random() * 512;
-         const y = Math.random() * 512;
-         const r = Math.random() * 40 + 10;
+      // 2. Continents - Simple Green shapes
+      const continentColor = '#4CAF50';
+      const desertColor = '#D4E157';
+
+      // Draw some random large continents
+      for(let i=0; i<6; i++) {
+          const cx = Math.random() * width;
+          const cy = height * 0.2 + Math.random() * (height * 0.6); // Avoid poles
+          const size = 50 + Math.random() * 120;
+          
+          // Main landmass
+          drawIrregularShape(cx, cy, size, continentColor, 0.8);
+          
+          // Maybe add a desert patch inside
+          if (Math.random() > 0.5) {
+             drawIrregularShape(cx, cy, size * 0.4, desertColor, 0.5);
+          }
+      }
+
+      // 3. Poles (Pure white caps) - Clean lines
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, 40); // North
+      ctx.fillRect(0, height-40, width, 40); // South
+  }
+  else if (id === 'venus') {
+      // Venus: Thick swirling clouds (Yellowish)
+      ctx.fillStyle = '#FBC02D';
+      ctx.fillRect(0,0,width,height);
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      for(let i=0; i<100; i++) {
+         const x = Math.random() * width;
+         const y = Math.random() * height;
+         const s = 100 + Math.random() * 200;
          ctx.beginPath();
-         ctx.arc(x,y,r,0,Math.PI*2);
+         ctx.ellipse(x, y, s, s/2, Math.random()*Math.PI, 0, Math.PI*2);
          ctx.fill();
       }
+  }
+  else if (id === 'mars') {
+      // Mars: Red/Rust with irregular dark patches
+      ctx.fillStyle = '#D84315';
+      ctx.fillRect(0,0,width,height);
       
-      if (id === 'earth') {
-          // Blue water background already set (from planet color)
-          // Draw green continents
-          ctx.fillStyle = '#2ecc71';
-          // Simple blobby shapes for continents
-          for(let k=0; k<5; k++) {
-              const x = Math.random() * 512;
-              const y = Math.random() * 512;
-              const s = Math.random() * 100 + 50;
-              ctx.beginPath();
-              ctx.arc(x,y,s,0,Math.PI*2);
-              ctx.fill();
-          }
-          // Clouds
-          ctx.fillStyle = 'rgba(255,255,255,0.6)';
-          for(let k=0; k<8; k++) {
-              const x = Math.random() * 512;
-              const y = Math.random() * 512;
-              const w = Math.random() * 100 + 20;
-              ctx.fillRect(x,y,w,20);
-          }
+      // Dark Patches
+      for(let i=0; i<20; i++) {
+          drawIrregularShape(
+              Math.random() * width, 
+              Math.random() * height, 
+              30 + Math.random() * 50, 
+              'rgba(62, 39, 35, 0.6)', 
+              0.5
+          );
+      }
+      // Ice Caps
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.ellipse(width/2, 20, 150, 30, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(width/2, height-20, 150, 30, 0, 0, Math.PI*2); ctx.fill();
+  }
+  else if (id === 'neptune') {
+      // Neptune: Deep Blue, Wispy
+      const grad = ctx.createLinearGradient(0,0,0,height);
+      grad.addColorStop(0, '#1A237E');
+      grad.addColorStop(0.5, '#2979FF');
+      grad.addColorStop(1, '#1A237E');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,width,height);
+      
+      // Dark Spot
+      ctx.fillStyle = 'rgba(0,0,50, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(width*0.7, height*0.5, 80, 50, 0, 0, Math.PI*2);
+      ctx.fill();
+      
+      // Clouds
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      for(let i=0; i<10; i++) {
+          const x = Math.random() * width;
+          const y = Math.random() * height;
+          ctx.fillRect(x, y, 60, 5);
       }
   }
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
-};
-
-// --- Gradient Map for Toon Shading ---
-const createGradientMap = () => {
-    const colors = new Uint8Array([64, 128, 192, 255]);
-    const texture = new THREE.DataTexture(colors, 4, 1, THREE.RedFormat);
-    texture.needsUpdate = true;
-    return texture;
 };
 
 interface MoonProps {
@@ -119,7 +287,6 @@ const Moon: React.FC<MoonProps> = ({ planetSize, index, globalPaused }) => {
   const speed = useMemo(() => 0.5 + Math.random() * 1.0, []);
   const distance = useMemo(() => planetSize + 0.8 + (index * 0.6), [planetSize, index]);
   const size = useMemo(() => 0.15 + Math.random() * 0.1, []);
-  const initialRotation = useMemo(() => Math.random() * Math.PI * 2, []);
   
   useFrame((state, delta) => {
     if (globalPaused) return;
@@ -129,11 +296,10 @@ const Moon: React.FC<MoonProps> = ({ planetSize, index, globalPaused }) => {
   });
 
   return (
-    <group ref={moonGroupRef} rotation={[0, initialRotation, 0]}>
+    <group ref={moonGroupRef} rotation={[0, Math.random() * Math.PI * 2, 0]}>
       <mesh position={[distance, 0, 0]}>
         <sphereGeometry args={[size, 16, 16]} />
-        <meshToonMaterial color="#bdc3c7" />
-        <Outlines thickness={1} color="black" />
+        <meshStandardMaterial color="#bdc3c7" roughness={0.8} />
       </mesh>
     </group>
   );
@@ -153,9 +319,16 @@ const PlanetMesh: React.FC<PlanetMeshProps> = ({ data, isSelected, isAnySelected
   const initialAngle = useMemo(() => Math.random() * Math.PI * 2, []);
   const [hovered, setHovered] = useState(false);
   
-  // Generate persistent textures
   const texture = useMemo(() => createPlanetTexture(data.textureType, data.color, data.id), [data]);
-  const gradientMap = useMemo(() => createGradientMap(), []);
+  const ringTexture = useMemo(() => data.ringColor ? createRingTexture(data.id) : null, [data.ringColor, data.id]);
+
+  // IMPORTANT: Dispose textures on unmount to avoid Context Lost due to memory leaks
+  useEffect(() => {
+    return () => {
+      texture.dispose();
+      if (ringTexture) ringTexture.dispose();
+    };
+  }, [texture, ringTexture]);
 
   useEffect(() => {
       if (orbitGroupRef.current) {
@@ -171,90 +344,106 @@ const PlanetMesh: React.FC<PlanetMeshProps> = ({ data, isSelected, isAnySelected
   }, [data.id, registerRef]);
 
   useFrame((state, delta) => {
-    // Orbit
     if (!isAnySelected && orbitGroupRef.current && data.id !== 'sun') {
       orbitGroupRef.current.rotation.y += data.speed * delta * 20; 
     }
-
-    // Rotation
     const shouldRotateSelf = data.id === 'sun' || isSelected || !isAnySelected;
     if (shouldRotateSelf && meshRef.current) {
          meshRef.current.rotation.y += 0.005;
     }
 
-    // Hover Animation (Scale + Highlight)
-    if (meshRef.current) {
-      const targetScale = hovered ? 1.25 : 1.0;
-      const lerpSpeed = 0.1;
-      meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), lerpSpeed);
+    if (meshRef.current && data.id !== 'sun') {
+      const targetScale = hovered ? 1.1 : 1.0;
+      meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     }
   });
+
+  // Correct rotation for Uranus rings (Vertical)
+  let ringRotation: [number, number, number] = [Math.PI / 2.2, 0, 0]; 
+  if (data.id === 'uranus') {
+     ringRotation = [0, 0, Math.PI / 2]; 
+  }
+
+  const showGlow = isSelected || hovered;
+  const isSun = data.id === 'sun';
 
   return (
     <group ref={orbitGroupRef}>
       <group position={[data.distance, 0, 0]}>
-        {/* Orbit Track */}
+        {/* Orbit Path */}
         {data.id !== 'sun' && !isSelected && !isAnySelected && (
            <mesh rotation={[Math.PI/2, 0, 0]} position={[-data.distance, 0, 0]}>
-             <ringGeometry args={[data.distance - 0.15, data.distance + 0.15, 64]} />
+             <ringGeometry args={[data.distance - 0.05, data.distance + 0.05, 128]} />
              <meshBasicMaterial color="#ffffff" opacity={0.1} transparent side={THREE.DoubleSide} />
            </mesh>
         )}
 
-        {/* Planet Body */}
-        <mesh 
-            ref={meshRef} 
-            onClick={(e) => { e.stopPropagation(); onClick(data.id); }}
-            onPointerOver={(e) => { 
-                e.stopPropagation();
-                document.body.style.cursor = 'pointer';
-                setHovered(true);
-            }}
-            onPointerOut={(e) => { 
-                document.body.style.cursor = 'auto';
-                setHovered(false);
-            }}
-        >
-          <sphereGeometry args={[data.size, 64, 64]} />
-          
-          {data.id === 'sun' ? (
-             // Sun glows and doesn't have outlines
-             <meshBasicMaterial map={texture} color="#fff" />
-          ) : (
-             // Toon Shader for everyone else
-             <meshToonMaterial 
-                color={data.color}
-                map={texture}
-                gradientMap={gradientMap}
-                emissive={data.color}
-                emissiveIntensity={hovered ? 0.4 : 0.2} // Increased base emissive slightly
-             />
-          )}
-          
-          {/* Vector-style Outline - Skip for Sun */}
-          {data.id !== 'sun' && (
-              <Outlines thickness={1.5} color="#000000" screenspace opacity={1} transparent={false} angle={0} />
-          )}
-        </mesh>
-
-        {/* Rings (Saturn/Uranus) */}
-        {data.ringColor && (
-            <mesh rotation={[Math.PI / 2.3, 0, 0]}>
-                <ringGeometry args={[data.size * 1.4, data.size * 2.3, 64]} />
-                <meshToonMaterial color={data.ringColor} transparent opacity={0.9} side={THREE.DoubleSide} />
-                <Outlines thickness={0.02} color="black" />
+        <group>
+            {/* Main Planet Body */}
+            <mesh 
+                ref={meshRef} 
+                onClick={(e) => { e.stopPropagation(); onClick(data.id); }}
+                onPointerOver={(e) => { 
+                    e.stopPropagation();
+                    document.body.style.cursor = 'pointer';
+                    setHovered(true);
+                }}
+                onPointerOut={(e) => { 
+                    document.body.style.cursor = 'auto';
+                    setHovered(false);
+                }}
+            >
+              <sphereGeometry args={[data.size, 64, 64]} />
+              {isSun ? (
+                 <meshBasicMaterial map={texture} color="#fff" />
+              ) : (
+                 <meshStandardMaterial 
+                    map={texture}
+                    roughness={0.8}
+                    metalness={0.1}
+                 />
+              )}
             </mesh>
-        )}
 
-        {/* Moons */}
-        {Array.from({length: data.moons}).map((_, i) => (
-             <Moon key={i} index={i} planetSize={data.size} globalPaused={isAnySelected} />
-        ))}
+            {/* Resplendent Glow (Enhanced) */}
+            {(isSun || showGlow) && (
+                <mesh scale={isSun ? 1.3 : 1.2}>
+                    <sphereGeometry args={[data.size, 32, 32]} />
+                    <meshBasicMaterial 
+                        color={isSun ? "#FFAB00" : data.color} 
+                        transparent 
+                        opacity={isSun ? 0.4 : 0.45} 
+                        side={THREE.BackSide} 
+                        blending={THREE.AdditiveBlending}
+                        depthWrite={false}
+                    />
+                </mesh>
+            )}
 
-        {/* Name Label */}
+            {/* Rings with Texture */}
+            {data.ringColor && ringTexture && (
+                <mesh rotation={ringRotation}>
+                    <ringGeometry args={[data.size * 1.3, data.size * 2.2, 128]} />
+                    <meshStandardMaterial 
+                        map={ringTexture} 
+                        transparent 
+                        opacity={0.8} 
+                        side={THREE.DoubleSide}
+                        roughness={0.8} 
+                    />
+                </mesh>
+            )}
+
+            {/* Moons */}
+            {Array.from({length: data.moons}).map((_, i) => (
+                 <Moon key={i} index={i} planetSize={data.size} globalPaused={isAnySelected} />
+            ))}
+        </group>
+
+        {/* Label */}
         {!isAnySelected && hovered && (
              <Html distanceFactor={15} position={[0, data.size + 1.5, 0]} style={{ pointerEvents: 'none' }}>
-                <div className="text-white text-xl font-bold whitespace-nowrap bg-black px-4 py-1 rounded-lg border-2 border-white shadow-lg space-font tracking-wider">
+                <div className="text-white text-xl font-bold whitespace-nowrap bg-indigo-900/80 px-4 py-1 rounded-lg border border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.5)] space-font tracking-wider backdrop-blur-sm">
                     {data.name}
                 </div>
             </Html>
@@ -266,100 +455,67 @@ const PlanetMesh: React.FC<PlanetMeshProps> = ({ data, isSelected, isAnySelected
 
 const CameraController: React.FC<{ 
     selectedPlanetId: string | null, 
-    playZoomSound: () => void,
     planetRefs: React.MutableRefObject<Record<string, THREE.Object3D>>
-}> = ({ selectedPlanetId, playZoomSound, planetRefs }) => {
+}> = ({ selectedPlanetId, planetRefs }) => {
     const isTransitioning = useRef(false);
     const prevSelectedId = useRef<string | null>(null);
-    
-    // Refs to hold the target values to lerp towards
     const targetPosRef = useRef(new THREE.Vector3(0, 50, 90));
     const targetLookAtRef = useRef(new THREE.Vector3(0, 0, 0));
 
     useEffect(() => {
-        // Trigger transition animation when selection changes
         if (selectedPlanetId !== prevSelectedId.current) {
             isTransitioning.current = true;
             prevSelectedId.current = selectedPlanetId;
-            if (selectedPlanetId) {
-                playZoomSound();
-            }
         }
-    }, [selectedPlanetId, playZoomSound]);
+    }, [selectedPlanetId]);
 
     useFrame((state) => {
         const controls = state.controls as any;
-        
-        // 1. Calculate Desired Target Coordinates based on current selection
-        // We do this every frame because even though planets are paused, robust logic is better.
         let desiredLookAt = new THREE.Vector3(0, 0, 0);
-        let desiredCamPos = new THREE.Vector3(0, 60, 100); // Overview default
+        let desiredCamPos = new THREE.Vector3(0, 60, 100);
 
         if (selectedPlanetId && planetRefs.current[selectedPlanetId]) {
             const planetObj = planetRefs.current[selectedPlanetId];
             planetObj.getWorldPosition(desiredLookAt);
-            
             const planet = PLANETS.find(p => p.id === selectedPlanetId);
             if (planet) {
-                 // Calculate position: "Lit Side" (between Sun and Planet)
                  const direction = desiredLookAt.clone().normalize();
                  if (direction.lengthSq() < 0.0001) direction.set(0, 0, 1);
-                 
-                 // Distance logic
                  const offsetDist = planet.size * 3.5 + 3.0; 
                  const heightOffset = planet.size * 0.5;
                  const sideOffset = planet.size * 0.5;
-
-                 // Sideways shift for composition
                  const sideVector = new THREE.Vector3(-direction.z, 0, direction.x).normalize().multiplyScalar(sideOffset);
-
                  desiredCamPos = desiredLookAt.clone()
-                    .sub(direction.multiplyScalar(offsetDist)) // Move towards sun
+                    .sub(direction.multiplyScalar(offsetDist))
                     .add(new THREE.Vector3(0, heightOffset, 0))
                     .add(sideVector);
             }
         }
-
         targetPosRef.current.copy(desiredCamPos);
         targetLookAtRef.current.copy(desiredLookAt);
 
-        // 2. Transition Logic
         if (isTransitioning.current) {
-            // Autopilot Mode: Fly camera to target
             state.camera.position.lerp(targetPosRef.current, 0.04);
-            
             if (controls) {
                 controls.target.lerp(targetLookAtRef.current, 0.04);
                 controls.update();
             }
-
-            // Check for arrival
             const posDist = state.camera.position.distanceTo(targetPosRef.current);
             const lookDist = controls ? controls.target.distanceTo(targetLookAtRef.current) : 0;
-            
-            // If close enough, disable autopilot
             if (posDist < 0.5 && lookDist < 0.5) {
                 isTransitioning.current = false;
             }
         } else {
-            // Manual Mode: User has control
-            // We ONLY update the control target so rotation happens around the planet
             if (controls) {
-                // Use a soft lerp to keep the target centered on the planet 
-                // (in case it was moving, though it's paused now)
                 controls.target.lerp(targetLookAtRef.current, 0.1);
                 controls.update();
             }
-            // CRITICAL: We DO NOT update state.camera.position here. 
-            // OrbitControls handles position based on user mouse input.
         }
     });
-
     return null;
 }
 
 const SolarSystem: React.FC<Props> = ({ selectedPlanetId, onPlanetSelect }) => {
-  const zoomAudioRef = useRef<HTMLAudioElement | null>(null);
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null);
   const planetRefs = useRef<Record<string, THREE.Object3D>>({});
 
@@ -373,12 +529,9 @@ const SolarSystem: React.FC<Props> = ({ selectedPlanetId, onPlanetSelect }) => {
       ambient.loop = true;
       ambient.volume = 0.3;
       ambientAudioRef.current = ambient;
-      
-      // Only start playing if we are in space initially
       if (!selectedPlanetId) {
           ambient.play().catch(e => {});
       }
-
       return () => {
           ambient.pause();
           ambient.src = "";
@@ -388,41 +541,40 @@ const SolarSystem: React.FC<Props> = ({ selectedPlanetId, onPlanetSelect }) => {
   useEffect(() => {
       const audio = ambientAudioRef.current;
       if (!audio) return;
-
       if (selectedPlanetId) {
-          // Stop melody when on a planet
           audio.pause();
       } else {
-          // Resume melody when back in space
           audio.volume = 0.3;
           audio.play().catch(e => {});
       }
   }, [selectedPlanetId]);
 
-  const playZoomSound = () => {
-      if (!zoomAudioRef.current) {
-          zoomAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/1407/1407-preview.mp3'); 
-          zoomAudioRef.current.volume = 0.5;
-      }
-      zoomAudioRef.current.currentTime = 0;
-      zoomAudioRef.current.play().catch(e => {});
-  };
-
-  // Dynamic minDistance calculation
   const selectedPlanet = useMemo(() => PLANETS.find(p => p.id === selectedPlanetId), [selectedPlanetId]);
   const minDistance = useMemo(() => {
       if (selectedPlanet) return selectedPlanet.size * 1.3 + 1;
-      return 10; // Overview min distance
+      return 10;
   }, [selectedPlanet]);
 
   return (
     <div className="w-full h-full absolute inset-0 z-0 bg-black">
-      <Canvas camera={{ position: [0, 50, 90], fov: 40 }}>
-        <color attach="background" args={['#050510']} />
-        <Stars radius={150} depth={50} count={5000} factor={4} saturation={0} fade speed={0.5} />
+      <Canvas 
+        camera={{ position: [0, 50, 90], fov: 40 }}
+        dpr={[1, 1.5]} // Limit pixel ratio to prevent GPU crashes
+        gl={{ 
+          antialias: true, 
+          powerPreference: "default", // Avoid forcing high-performance which can lead to context loss
+          preserveDrawingBuffer: false 
+        }}
+      >
+        <color attach="background" args={['#020205']} />
         
-        <ambientLight intensity={0.8} />
-        <pointLight position={[0, 0, 0]} intensity={2.5} color="#fff" distance={300} />
+        {/* Richer Star Background */}
+        <Stars radius={150} depth={50} count={7000} factor={4} saturation={0} fade speed={0.5} />
+        <Sparkles count={500} scale={100} size={2} speed={0.4} opacity={0.5} color="#fff" />
+
+        {/* Lighting for StandardMaterial */}
+        <ambientLight intensity={0.2} />
+        <pointLight position={[0, 0, 0]} intensity={3} color="#FFD54F" distance={300} decay={1} />
         
         <group>
             {PLANETS.map((planet) => (
@@ -439,7 +591,6 @@ const SolarSystem: React.FC<Props> = ({ selectedPlanetId, onPlanetSelect }) => {
 
         <CameraController 
             selectedPlanetId={selectedPlanetId} 
-            playZoomSound={playZoomSound}
             planetRefs={planetRefs}
         />
         

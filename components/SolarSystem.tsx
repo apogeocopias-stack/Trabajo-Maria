@@ -7,12 +7,15 @@ import { PLANETS } from '../constants';
 import { PlanetData } from '../types';
 
 // Add type definitions for React Three Fiber elements
-declare module 'react' {
+declare global {
   namespace JSX {
     interface IntrinsicElements {
       group: any;
       mesh: any;
       sphereGeometry: any;
+      boxGeometry: any;
+      cylinderGeometry: any;
+      coneGeometry: any;
       meshStandardMaterial: any;
       meshBasicMaterial: any;
       ringGeometry: any;
@@ -274,6 +277,77 @@ const createPlanetTexture = (type: string, colorHex: string, id: string): THREE.
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
+};
+
+// --- Components ---
+
+const Spaceship = () => {
+    const groupRef = useRef<THREE.Group>(null);
+
+    useFrame(({ clock }) => {
+        if (groupRef.current) {
+            const t = clock.getElapsedTime();
+            // Place between Mars (22) and Jupiter (32) -> 27
+            // This corresponds to the Asteroid Belt area
+            const radius = 27;
+            const speed = 0.25; // Slightly faster orbit at closer range
+            const angle = t * speed;
+            
+            groupRef.current.position.x = Math.cos(angle) * radius;
+            groupRef.current.position.z = Math.sin(angle) * radius;
+            
+            // Bobbing motion + Adjusted Altitude
+            groupRef.current.position.y = Math.sin(t * 2) * 1.5 + 2;
+
+            // Face direction of travel (tangent to circle)
+            groupRef.current.rotation.y = -angle;
+            
+            // Banking slightly
+            groupRef.current.rotation.z = Math.sin(t) * 0.3;
+        }
+    });
+
+    // Scaled down to 0.4 (smaller) as requested
+    return (
+        <group ref={groupRef} scale={[0.4, 0.4, 0.4]}>
+            {/* Main Hull */}
+            <mesh rotation={[0, 0, -Math.PI / 2]}>
+                <cylinderGeometry args={[0.8, 1.2, 4, 8]} />
+                <meshStandardMaterial color="#e0e0e0" metalness={0.8} roughness={0.2} />
+            </mesh>
+            {/* Nose Cone */}
+            <mesh position={[2.5, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+                <coneGeometry args={[0.8, 1, 16]} />
+                <meshStandardMaterial color="#ff4444" />
+            </mesh>
+            {/* Engine Output (Glow) */}
+            <mesh position={[-2.2, 0, 0]}>
+                <sphereGeometry args={[0.6]} />
+                <meshBasicMaterial color="#00ffff" />
+            </mesh>
+            {/* Wings */}
+            <mesh position={[-0.5, 0, 0]}>
+                <boxGeometry args={[1.5, 0.2, 4]} />
+                <meshStandardMaterial color="#333" />
+            </mesh>
+             {/* Vertical Fin */}
+             <mesh position={[-1, 1, 0]}>
+                <boxGeometry args={[1.5, 2, 0.2]} />
+                <meshStandardMaterial color="#333" />
+            </mesh>
+            {/* Cockpit */}
+            <mesh position={[0.5, 0.8, 0]}>
+                <sphereGeometry args={[0.6, 16, 16]} />
+                <meshStandardMaterial color="#81d4fa" transparent opacity={0.6} />
+            </mesh>
+            {/* Label */}
+             <Html distanceFactor={20} position={[0, 3, 0]} style={{ pointerEvents: 'none' }}>
+                <div className="bg-white/10 backdrop-blur text-white px-2 py-1 rounded text-xs font-bold border border-white/20">
+                    Nau Max Aub
+                </div>
+            </Html>
+        </group>
+    );
 };
 
 interface MoonProps {
@@ -572,9 +646,9 @@ const SolarSystem: React.FC<Props> = ({ selectedPlanetId, onPlanetSelect }) => {
         <Stars radius={150} depth={50} count={7000} factor={4} saturation={0} fade speed={0.5} />
         <Sparkles count={500} scale={100} size={2} speed={0.4} opacity={0.5} color="#fff" />
 
-        {/* Lighting for StandardMaterial */}
-        <ambientLight intensity={0.2} />
-        <pointLight position={[0, 0, 0]} intensity={3} color="#FFD54F" distance={300} decay={1} />
+        {/* Lighting for StandardMaterial - INCREASED BRIGHTNESS */}
+        <ambientLight intensity={1.5} />
+        <pointLight position={[0, 0, 0]} intensity={5} color="#ffffff" distance={500} decay={0.2} />
         
         <group>
             {PLANETS.map((planet) => (
@@ -588,6 +662,9 @@ const SolarSystem: React.FC<Props> = ({ selectedPlanetId, onPlanetSelect }) => {
                 />
             ))}
         </group>
+
+        {/* The Spaceship patrolling the system */}
+        <Spaceship />
 
         <CameraController 
             selectedPlanetId={selectedPlanetId} 

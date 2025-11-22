@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { AppPhase, AvatarConfig, QuizResult } from './types';
 import AvatarCreator from './components/AvatarCreator';
 import SolarSystem from './components/SolarSystem';
 import PlanetOverlay from './components/PlanetOverlay';
 import SchoolEnding from './components/SchoolEnding';
+import Academy from './components/Academy';
 
 const STORAGE_KEY = 'max_aub_avatar_config';
 
@@ -28,14 +28,23 @@ const App: React.FC = () => {
   const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   
-  const handleAvatarComplete = (config: AvatarConfig) => {
+  const handleAvatarComplete = (config: AvatarConfig, skipAcademy: boolean) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
     } catch (e) {
       console.error("Failed to save to localStorage (likely quota exceeded)", e);
     }
     setAvatarConfig(config);
-    setPhase(AppPhase.SOLAR_SYSTEM);
+    
+    if (skipAcademy) {
+        setPhase(AppPhase.SOLAR_SYSTEM);
+    } else {
+        setPhase(AppPhase.ACADEMY);
+    }
+  };
+
+  const handleAcademyComplete = () => {
+      setPhase(AppPhase.SOLAR_SYSTEM);
   };
 
   const handleQuizUpdate = (newResults: QuizResult[]) => {
@@ -63,6 +72,13 @@ const App: React.FC = () => {
       
       {phase === AppPhase.AVATAR_CREATION && (
         <AvatarCreator onComplete={handleAvatarComplete} />
+      )}
+
+      {phase === AppPhase.ACADEMY && avatarConfig && (
+          <Academy 
+            pilotName={avatarConfig.name} 
+            onComplete={handleAcademyComplete} 
+          />
       )}
 
       {phase === AppPhase.SOLAR_SYSTEM && (

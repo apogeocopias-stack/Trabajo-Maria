@@ -3,7 +3,7 @@ import { AvatarConfig } from '../types';
 import { generateAvatarImage } from '../services/geminiService';
 
 interface Props {
-  onComplete: (config: AvatarConfig) => void;
+  onComplete: (config: AvatarConfig, skipAcademy: boolean) => void;
 }
 
 const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
@@ -60,9 +60,15 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
     }
   };
 
-  const handleStartMission = () => {
+  const handleStartAcademy = () => {
     if (generatedImage) {
-      onComplete({ ...formData, imageUrl: generatedImage });
+      onComplete({ ...formData, imageUrl: generatedImage }, false);
+    }
+  };
+
+  const handleStartDirect = () => {
+    if (generatedImage) {
+        onComplete({ ...formData, imageUrl: generatedImage }, true);
     }
   };
 
@@ -101,6 +107,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 placeholder="El teu nom"
+                disabled={!!generatedImage}
               />
             </div>
 
@@ -111,6 +118,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                   value={formData.gender}
                   onChange={(e) => setFormData({...formData, gender: e.target.value as 'nen'|'nena'})}
                   className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
+                  disabled={!!generatedImage}
                 >
                   <option value="nena">Nena</option>
                   <option value="nen">Nen</option>
@@ -122,6 +130,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                   value={formData.height}
                   onChange={(e) => setFormData({...formData, height: e.target.value})}
                   className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
+                  disabled={!!generatedImage}
                 >
                   <option value="alta">Alta</option>
                   <option value="mitjana">Mitjana</option>
@@ -137,6 +146,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                   value={formData.hairColor}
                   onChange={(e) => setFormData({...formData, hairColor: e.target.value})}
                   className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
+                  disabled={!!generatedImage}
                 >
                   <option value="ros">Ros</option>
                   <option value="castany">Castany</option>
@@ -152,6 +162,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                   value={formData.hairType}
                   onChange={(e) => setFormData({...formData, hairType: e.target.value})}
                   className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
+                  disabled={!!generatedImage}
                 >
                   <option value="llis">Llis</option>
                   <option value="arrissat">Arrissat</option>
@@ -195,12 +206,23 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
             )}
 
             {generatedImage && (
-              <button
-                onClick={handleStartMission}
-                className="mt-8 w-full bg-gradient-to-r from-green-400 to-emerald-600 text-white font-bold py-3 rounded-xl hover:scale-105 transition-transform shadow-lg shadow-green-500/20 animate-bounce"
-              >
-                Enlairament a l'Espai! 🚀
-              </button>
+              <div className="mt-8 w-full space-y-3 animate-fade-in">
+                <p className="text-center text-indigo-200 text-sm mb-2 font-bold">Com vols començar?</p>
+                
+                <button
+                  onClick={handleStartAcademy}
+                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 rounded-xl hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2"
+                >
+                  <span>🎓</span> Sóc Cadet: Entrenament
+                </button>
+
+                <button
+                  onClick={handleStartDirect}
+                  className="w-full bg-gradient-to-r from-red-500 to-orange-600 text-white font-bold py-3 rounded-xl hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2"
+                >
+                  <span>🚀</span> Sóc Comandant: Enlairament!
+                </button>
+              </div>
             )}
           </div>
         </div>

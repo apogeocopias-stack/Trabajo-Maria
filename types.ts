@@ -1,6 +1,7 @@
 
 export enum AppPhase {
   AVATAR_CREATION = 'AVATAR_CREATION',
+  ACADEMY = 'ACADEMY',
   SOLAR_SYSTEM = 'SOLAR_SYSTEM',
   OUTRO = 'OUTRO'
 }
@@ -34,7 +35,7 @@ export interface PlanetData {
   ringColor?: string;
   ringTextureUrl?: string; // New field for realistic rings
   description: string;
-  youtubeId: string; // Placeholder for video ID
+  youtubeId: string; // Can be a YouTube ID OR a full Google Drive URL
   
   // New engaging texts
   videoText: string;

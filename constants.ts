@@ -15,16 +15,33 @@ export const PLANETS: PlanetData[] = [
     textureType: 'star',
     textureUrl: 'https://www.solarsystemscope.com/textures/download/8k_sun.jpg',
     description: 'L\'estrella al centre del nostre sistema solar.',
-    youtubeId: '1YcXany7XDs',
+    youtubeId: '1GILzyh3Axc',
     videoText: 'Atenció! Els filtres solars estan llestos. Vols veure el foc de prop?',
     quizText: 'Suportaràs la calor d\'aquestes preguntes?',
     moons: 0,
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/01e6f3bb-ee3b-4451-8573-9c90164ff25b?artifactId=31e995fd-18cd-4605-b743-d9e9b3b70289',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari del Sol a NotebookLM?',
-        options: ['Sí, missió complerta', 'No, encara no'],
+        text: 'De què està fet principalment el Sol?',
+        options: ['Roca fosa', 'Hidrogen i Heli', 'Foc màgic'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 2,
+        text: 'Quant triga la llum del Sol en arribar a la Terra?',
+        options: ['1 segon', '8 minuts', '24 hores'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 3,
+        text: 'Quina temperatura fa a la superfície del Sol?',
+        options: ['100 graus', '1.000 graus', '5.500 graus'],
+        correctAnswerIndex: 2
+      },
+      {
+        id: 4,
+        text: 'Què passaria si el Sol s\'apagués de cop?',
+        options: ['Ens quedaríem a les fosques i ens congelaríem', 'Faríem servir llanternes', 'La Lluna ens donaria llum'],
         correctAnswerIndex: 0
       }
     ]
@@ -39,17 +56,34 @@ export const PLANETS: PlanetData[] = [
     textureType: 'rocky',
     textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_mercury.jpg',
     description: 'El planeta més petit i proper al Sol.',
-    youtubeId: 'Vqazv5WUFBs',
+    youtubeId: 'QLqcgG0uSoM',
     videoText: 'Missatge urgent del planeta més ràpid! Mira això abans que s\'escapi.',
     quizText: 'Ets ràpid... però ets llest? Demostra-ho!',
     moons: 0,
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/d973e17c-92e3-4631-8c46-14389b064433?artifactId=7ed66502-d6cf-4e96-8c33-7c2bc126c09e',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari de Mercuri a NotebookLM?',
-        options: ['Sí, completat', 'Encara no'],
-        correctAnswerIndex: 0
+        text: 'Com és la superfície de Mercuri?',
+        options: ['Llisa com una pilota', 'Plena de forats (cràters)', 'Plena d\'aigua'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 2,
+        text: 'Fa calor o fred a Mercuri?',
+        options: ['Sempre fa calor', 'Sempre fa fred', 'De dia crema i de nit gela'],
+        correctAnswerIndex: 2
+      },
+      {
+        id: 3,
+        text: 'Té atmosfera per respirar?',
+        options: ['Sí, molt bona', 'No, no té aire', 'Només una mica'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 4,
+        text: 'Com de ràpid va al voltant del Sol?',
+        options: ['És el més lent', 'És el més ràpid de tots', 'Va a la mateixa velocitat que la Terra'],
+        correctAnswerIndex: 1
       }
     ]
   },
@@ -63,17 +97,34 @@ export const PLANETS: PlanetData[] = [
     textureType: 'gaseous',
     textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_venus_surface.jpg',
     description: 'El planeta més calorós del sistema solar.',
-    youtubeId: 'y7QpSLd3DCQ',
+    youtubeId: 'OVqHbV1nEi4',
     videoText: 'Compte amb els núvols! Hem enviat una sonda a través de la boira.',
     quizText: 'Saps per què Venus brilla tant? Resol el misteri!',
     moons: 0,
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/c684f72d-eb49-4d65-b0a0-c4c7aef548ea?artifactId=166ea394-172d-41b8-ab14-987ee4af93f6',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari de Venus a NotebookLM?',
-        options: ['Sí, missió completada', 'Encara no'],
+        text: 'Per què Venus brilla tant al cel?',
+        options: ['Perquè té llum pròpia', 'Pels seus núvols espessos que reflecteixen el Sol', 'Perquè és un mirall'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 2,
+        text: 'Es coneix com el "germà" de la Terra perquè...',
+        options: ['Tenen una mida similar', 'Tenen vida', 'Són del mateix color'],
         correctAnswerIndex: 0
+      },
+      {
+        id: 3,
+        text: 'Què passa si trepitges Venus?',
+        options: ['Res, és agradable', 'Flotaries', 'T\'aixafaria la pressió i la calor'],
+        correctAnswerIndex: 2
+      },
+      {
+        id: 4,
+        text: 'Una curiositat boja de Venus:',
+        options: ['Té anells quadrats', 'Gira al revés que els altres', 'És un cub'],
+        correctAnswerIndex: 1
       }
     ]
   },
@@ -87,17 +138,34 @@ export const PLANETS: PlanetData[] = [
     textureType: 'rocky',
     textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_earth_daymap.jpg',
     description: 'La nostra llar, el planeta blau.',
-    youtubeId: 'ASWtl4HdIJQ',
+    youtubeId: 'OoCoWuT962g',
     videoText: 'Transmissió des de casa! Mira el nostre planeta com mai abans.',
     quizText: 'Creus que coneixes casa teva... Segur? Posa\'t a prova.',
     moons: 1,
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/09800d3e-4afd-4134-be90-1fb41c163736?artifactId=f69eedf9-d1bf-4404-a0f6-3c39eaf08b33',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari de la Terra a NotebookLM?',
-        options: ['Sí, missió completada', 'Encara no'],
+        text: 'Quin moviment de la Terra crea el dia i la nit?',
+        options: ['Translació (volta al Sol)', 'Rotació (volta sobre si mateixa)', 'Vibració'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 2,
+        text: 'Quina part de la superfície de la Terra és aigua?',
+        options: ['La meitat (50%)', 'Molt poca (10%)', 'Un 70% (tres quartes parts)'],
+        correctAnswerIndex: 2
+      },
+      {
+        id: 3,
+        text: 'Quines són les tres capes principals de la Terra?',
+        options: ['Escorça, mantell i nucli', 'Pedra, aigua i aire', 'Pell, carn i ós'],
         correctAnswerIndex: 0
+      },
+      {
+        id: 4,
+        text: 'El gas més abundant a la nostra atmosfera és...',
+        options: ['L\'Oxigen', 'El Nitrogen', 'El Diòxid de Carboni'],
+        correctAnswerIndex: 1
       }
     ]
   },
@@ -115,13 +183,30 @@ export const PLANETS: PlanetData[] = [
     videoText: 'El Rover ha enviat un vídeo secret des de la superfície vermella!',
     quizText: 'A punt pel teu entrenament d\'astronauta marcià?',
     moons: 2,
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/64a58a7e-2781-43b9-9a64-fa504ea165f3?artifactId=f3fd3c22-7b97-435d-a0e6-7af1630641d2',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari de Mart a NotebookLM?',
-        options: ['Sí, missió completada', 'Encara no'],
-        correctAnswerIndex: 0
+        text: 'Per què és de color vermell?',
+        options: ['Perquè fa calor', 'Pel ferro rovellat a la sorra', 'Perquè està enfadat'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 2,
+        text: 'Quina muntanya famosa té Mart?',
+        options: ['L\'Everest', 'El Mont Blanc', 'L\'Olimp, la més alta de totes'],
+        correctAnswerIndex: 2
+      },
+      {
+        id: 3,
+        text: 'Hi viuen marcians verds?',
+        options: ['Sí, a tot arreu', 'No, però hi hem enviat robots', 'Sí, sota terra'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 4,
+        text: 'Hi ha aigua a Mart?',
+        options: ['No, és tot desert', 'Sí, rius grans', 'Sí, però congelada als pols'],
+        correctAnswerIndex: 2
       }
     ]
   },
@@ -135,17 +220,34 @@ export const PLANETS: PlanetData[] = [
     textureType: 'gaseous',
     textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_jupiter.jpg',
     description: 'El planeta més gran del sistema solar.',
-    youtubeId: 'jFV4dB5AplU',
+    youtubeId: 'srLadulE2B4',
     videoText: 'És GEGANT! Mira el que ha gravat la nau al passar a prop.',
     quizText: 'Un planeta gran necessita un cervell gran. T\'atreveixes?',
     moons: 4, 
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/ca3f78e2-9537-40d3-88c1-62d94b289049?artifactId=53e6f189-94cc-4aca-aa6a-45e9296ca1d3',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari de Júpiter a NotebookLM?',
-        options: ['Sí, missió completada', 'Encara no'],
-        correctAnswerIndex: 0
+        text: 'Com és de gran Júpiter?',
+        options: ['Com la Terra', 'Hi cabrien 1.300 Terres a dins', 'Més petit que la Lluna'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 2,
+        text: 'Què és la Gran Taca Vermella?',
+        options: ['Una muntanya', 'Un volcà', 'Una tempesta gegant'],
+        correctAnswerIndex: 2
+      },
+      {
+        id: 3,
+        text: 'És un planeta sòlid on pots trepitjar?',
+        options: ['Sí, és clar', 'No, és una bola de gas', 'És líquid'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 4,
+        text: 'Té llunes Júpiter?',
+        options: ['Cap', 'Una o dues', 'Moltíssimes, més de 70'],
+        correctAnswerIndex: 2
       }
     ]
   },
@@ -160,17 +262,34 @@ export const PLANETS: PlanetData[] = [
     textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_saturn.jpg',
     ringColor: '#F7DC6F', // Lighter Gold Rings
     description: 'Famós pels seus espectaculars anells.',
-    youtubeId: 'epZdZaEQhS0',
+    youtubeId: 'WanHhka2qns',
     videoText: 'Els anells estan cantant! Escolta la història del Senyor dels Anells.',
     quizText: 'Pots comptar tots els anells sense marejar-te? Posa a prova el teu saber!',
     moons: 5,
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/9423026c-d637-4ee8-9ce2-8743ab6f8f63?artifactId=b94f4900-aaa0-4b8b-911d-db89961d82ce',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari de Saturn a NotebookLM?',
-        options: ['Sí, missió completada', 'Encara no'],
-        correctAnswerIndex: 0
+        text: 'Què fa únic a Saturn?',
+        options: ['És quadrat', 'Els seus anells brillants', 'És de color rosa'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 2,
+        text: 'Si poséssim Saturn en una piscina gegant...',
+        options: ['S\'enfonsaria', 'Suraria com una pilota', 'Es dissoldria'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 3,
+        text: 'De què estan fets els anells?',
+        options: ['Or i plata', 'Boles de gel i roques', 'Gasos de colors'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 4,
+        text: 'És un gegant de...',
+        options: ['Roca', 'Foc', 'Gas, com Júpiter'],
+        correctAnswerIndex: 2
       }
     ]
   },
@@ -185,17 +304,34 @@ export const PLANETS: PlanetData[] = [
     textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_uranus.jpg',
     ringColor: '#A9DFBF', // Very pale green/cyan ring
     description: 'El gegant de gel que gira de costat.',
-    youtubeId: '6QvQ3Nq01aI',
+    youtubeId: 'BDQEZwukOd8',
     videoText: 'Un planeta que gira de costat? Has de veure això per creure-ho!',
     quizText: 'Aquest planeta és molt fred... no et congelis amb les respostes!',
     moons: 3,
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/3ff940e7-c428-41ee-b499-cd291cd398e5?artifactId=8cb0256e-0522-4d7d-bdc6-109ce082db5e',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari d\'Urà a NotebookLM?',
-        options: ['Sí, missió completada', 'Encara no'],
-        correctAnswerIndex: 0
+        text: 'De quin color és Urà?',
+        options: ['Vermell', 'Blau cel', 'Groc'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 2,
+        text: 'Quina raresa fa Urà al girar?',
+        options: ['Gira molt ràpid', 'Gira tombat, de costat', 'No gira'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 3,
+        text: 'Fa calor allà?',
+        options: ['Sí, molta', 'Ni fred ni calor', 'No! És un gegant de gel'],
+        correctAnswerIndex: 2
+      },
+      {
+        id: 4,
+        text: 'Té anells Urà?',
+        options: ['No en té', 'Sí, però són molt fins i foscos', 'Sí, fets de foc'],
+        correctAnswerIndex: 1
       }
     ]
   },
@@ -209,17 +345,34 @@ export const PLANETS: PlanetData[] = [
     textureType: 'gaseous',
     textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_neptune.jpg',
     description: 'El planeta més ventós i llunyà.',
-    youtubeId: 'NStn75gIhwg',
+    youtubeId: 'HteGQfShm84',
     videoText: 'Senyal captat des de la vora del sistema! El vent bufa fort.',
     quizText: 'El viatge ha estat llarg... recordes tot el que has après?',
     moons: 3,
-    externalQuizUrl: 'https://notebooklm.google.com/notebook/736bf854-3140-49af-a63a-a574b23fea01?artifactId=8b24305f-0be7-4403-a722-491c5c5ab2d1',
     quiz: [
       {
         id: 1,
-        text: 'Has completat el qüestionari de Neptú a NotebookLM?',
-        options: ['Sí, missió completada', 'Encara no'],
+        text: 'Per què és el planeta més fosc i fred?',
+        options: ['Perquè és el més llunyà del Sol', 'Perquè sempre és de nit', 'Perquè és de gel'],
         correctAnswerIndex: 0
+      },
+      {
+        id: 2,
+        text: 'Quin temps fa a Neptú?',
+        options: ['Sol i platja', 'Molt de vent i tempestes', 'Tranquil'],
+        correctAnswerIndex: 1
+      },
+      {
+        id: 3,
+        text: 'Quant triga a donar la volta al Sol?',
+        options: ['1 any', '10 anys', 'Moltíssim, 165 anys'],
+        correctAnswerIndex: 2
+      },
+      {
+        id: 4,
+        text: 'De quin color el veiem?',
+        options: ['Verd', 'Blau fosc intens', 'Gris'],
+        correctAnswerIndex: 1
       }
     ]
   }

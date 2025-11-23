@@ -129,13 +129,14 @@ const Academy: React.FC<Props> = ({ pilotName, onComplete }) => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
       {/* Animated Star Background (CSS only for simplicity here) */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-50 animate-pulse"></div>
       </div>
 
-      <div className="z-10 w-full max-w-4xl bg-gray-900/80 backdrop-blur-lg border-2 border-indigo-500/50 rounded-3xl p-8 md:p-12 shadow-[0_0_50px_rgba(79,70,229,0.3)] relative">
+      {/* Responsive Container: w-[95%] on mobile, max-w-4xl on desktop. max-h to prevent overflow on landscape tablets */}
+      <div className="z-10 w-full md:w-[95%] max-w-4xl bg-gray-900/80 backdrop-blur-lg border-2 border-indigo-500/50 rounded-3xl p-6 md:p-12 shadow-[0_0_50px_rgba(79,70,229,0.3)] relative flex flex-col max-h-[90vh]">
         
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 w-full h-2 bg-gray-800 rounded-t-3xl overflow-hidden">
@@ -145,51 +146,52 @@ const Academy: React.FC<Props> = ({ pilotName, onComplete }) => {
           ></div>
         </div>
 
-        <div className="flex flex-col items-center text-center min-h-[400px] justify-center">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 flex flex-col items-center text-center justify-center overflow-y-auto custom-scrollbar min-h-[300px]">
           
           {slide.isCountdown ? (
-            <div className="scale-150 animate-bounce">
-               <div className="text-9xl font-bold text-red-500 space-font mb-8 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)]">
+            <div className="scale-125 md:scale-150 animate-bounce py-10">
+               <div className="text-8xl md:text-9xl font-bold text-red-500 space-font mb-4 md:mb-8 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)]">
                  {countdown > 0 ? countdown : "GO!"}
                </div>
             </div>
           ) : (
-            <div className="text-8xl mb-6 animate-bounce">{slide.icon}</div>
+            <div className="text-6xl md:text-8xl mb-4 md:mb-6 animate-bounce">{slide.icon}</div>
           )}
 
-          <h2 className={`text-4xl md:text-5xl font-bold mb-6 space-font ${slide.color}`}>
+          <h2 className={`text-3xl md:text-5xl font-bold mb-4 md:mb-6 space-font ${slide.color}`}>
             {slide.title}
           </h2>
 
-          <div className="text-xl md:text-2xl text-gray-200 leading-relaxed max-w-2xl whitespace-pre-line">
+          <div className="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-2xl whitespace-pre-line px-2">
              {typeof slide.content === 'function' ? slide.content(pilotName) : slide.content}
           </div>
 
         </div>
 
-        {/* Controls */}
+        {/* Controls - Always pinned to bottom */}
         {!slide.isCountdown && (
-          <div className="flex justify-between items-center mt-8 pt-8 border-t border-gray-700">
+          <div className="flex justify-between items-center mt-6 md:mt-8 pt-4 md:pt-8 border-t border-gray-700 shrink-0">
             <button 
               onClick={prevSlide}
               disabled={currentSlide === 0}
-              className={`px-6 py-3 rounded-xl font-bold text-lg transition-all ${currentSlide === 0 ? 'opacity-0 pointer-events-none' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
+              className={`px-4 py-2 md:px-6 md:py-3 rounded-xl font-bold text-sm md:text-lg transition-all ${currentSlide === 0 ? 'opacity-0 pointer-events-none' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
             >
-              ← Anterior
+              ← <span className="hidden sm:inline">Anterior</span>
             </button>
 
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 md:gap-2">
               {SLIDES.map((_, idx) => (
                 <div 
                   key={idx} 
-                  className={`w-3 h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-white scale-125' : 'bg-gray-600'}`}
+                  className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-white scale-125' : 'bg-gray-600'}`}
                 />
               ))}
             </div>
 
             <button 
               onClick={nextSlide}
-              className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold text-lg shadow-lg hover:scale-105 transition-all flex items-center gap-2"
+              className="px-4 py-2 md:px-8 md:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold text-sm md:text-lg shadow-lg hover:scale-105 transition-all flex items-center gap-2"
             >
               {currentSlide === SLIDES.length - 2 ? 'Llançament!' : 'Següent'} →
             </button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Question, QuizResult } from '../types';
 import { PLANETS } from '../constants';
@@ -129,25 +128,20 @@ const PlanetOverlay: React.FC<Props> = ({
     }
   };
 
-  // --- ROBUST VIDEO SOURCE HELPER (MAX COMPATIBILITY) ---
+  // --- ROBUST VIDEO SOURCE HELPER ---
   const getVideoSrc = (input: string) => {
     if (!input) return { embed: "", direct: "" };
 
-    // 1. Handle Google Drive
     if (input.includes("drive.google.com")) {
         const url = input.replace(/\/view.*$/, '/preview').replace(/\/edit.*$/, '/preview');
         return { embed: url, direct: input };
     }
 
-    // 2. Handle Generic HTTP (Vimeo, etc, but not YouTube)
     if (input.startsWith("http") && !input.includes("youtu")) {
         return { embed: input, direct: input };
     }
 
-    // 3. Handle YouTube
     let videoId = input;
-    
-    // Regex to extract ID from various YouTube URL formats
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = input.match(regExp);
 
@@ -164,21 +158,18 @@ const PlanetOverlay: React.FC<Props> = ({
 
   const videoLinks = selectedPlanet ? getVideoSrc(selectedPlanet.youtubeId) : { embed: "", direct: "" };
 
-  // Botón de pantalla completa rediseñado y posicionado
-  const FullscreenButton = () => (
+  // Floating Fullscreen Button (Right Side - Hidden on very small screens to save space)
+  const FloatingFullscreenButton = () => (
     <button 
         onClick={toggleFullscreen}
-        className="fixed right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-indigo-600 backdrop-blur-md text-white p-4 rounded-full border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all z-[60] pointer-events-auto hover:scale-110 group"
+        className="hidden sm:block fixed right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-indigo-600/80 backdrop-blur-md text-white p-3 rounded-full border border-white/20 shadow-lg transition-all z-[60] pointer-events-auto hover:scale-110 group"
         title={isFullscreen ? "Sortir de pantalla completa" : "Pantalla completa"}
       >
         {isFullscreen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
         )}
-        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-            {isFullscreen ? "Minimitzar" : "Pantalla Completa"}
-        </span>
       </button>
   );
 
@@ -186,43 +177,55 @@ const PlanetOverlay: React.FC<Props> = ({
   if (!selectedPlanetId) {
     return (
       <div className="absolute top-0 left-0 h-full w-full z-10 pointer-events-none">
-        <FullscreenButton />
+        <FloatingFullscreenButton />
         
-        {/* Adjusted width for Surface Pro (w-72 on md, w-96 on lg) and max-height for scrolling */}
-        <div className="h-full w-full sm:w-72 md:w-80 lg:w-96 p-4 md:p-6 flex flex-col gap-3 pointer-events-auto overflow-y-auto max-h-screen no-scrollbar">
+        {/* 
+          RESPONSIVE SIDEBAR:
+          w-48 on small screens
+          w-60 on tablets
+          w-72 on desktops
+          max-h-screen + overflow-y-auto ensures it fits on short projector screens
+        */}
+        <div className="h-full w-48 sm:w-60 md:w-72 p-2 sm:p-3 flex flex-col gap-2 pointer-events-auto overflow-y-auto no-scrollbar bg-black/40 backdrop-blur-md border-r border-white/10 shadow-2xl transition-all duration-300">
            
-           {/* Pilot Card */}
-           <div className="bg-indigo-900/80 backdrop-blur p-4 rounded-2xl border-2 border-indigo-500 mb-2 flex items-center gap-4 shadow-2xl shrink-0">
+           {/* Pilot Card (Responsive) */}
+           <div className="bg-indigo-900/80 backdrop-blur p-2 sm:p-3 rounded-xl border border-indigo-500/50 mb-1 flex items-center gap-2 sm:gap-3 shadow-lg shrink-0">
               {avatarUrl && (
                   <div className="relative shrink-0">
-                      <img src={avatarUrl} className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] object-cover" alt="Avatar" />
-                      <div className="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
+                      <img src={avatarUrl} className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)] object-cover" alt="Avatar" />
                   </div>
               )}
-              <div className="flex-1 min-w-0">
-                  <p className="text-xs text-indigo-300 uppercase tracking-widest font-bold">Comandant</p>
-                  <p className="font-bold text-white text-lg md:text-xl capitalize space-font truncate">{pilotName || 'Explorant...'}</p>
+              <div className="flex-1 min-w-0 overflow-hidden">
+                  <p className="text-[9px] sm:text-[10px] text-indigo-300 uppercase tracking-widest font-bold truncate">Comandant</p>
+                  <p className="font-bold text-white text-xs sm:text-sm md:text-base capitalize space-font truncate">{pilotName || 'Explorant...'}</p>
+                  {/* Integrated Fullscreen Button in Sidebar (Always visible) */}
+                  <button 
+                    onClick={toggleFullscreen}
+                    className="mt-1 text-[9px] sm:text-[10px] bg-black/40 hover:bg-white/20 text-indigo-200 px-2 py-0.5 rounded flex items-center gap-1 transition-colors w-full justify-center sm:justify-start"
+                  >
+                     {isFullscreen ? '✕ Sortir' : '⛶ Pantalla completa'}
+                  </button>
               </div>
            </div>
 
           <button 
             onClick={onFinishJourney}
-            className="mb-2 w-full bg-red-600 hover:bg-red-700 text-white p-3 rounded-xl font-bold border-2 border-red-400 shadow-lg animate-pulse flex items-center justify-center gap-2 text-base shrink-0 transition-transform active:scale-95"
+            className="w-full bg-red-600/90 hover:bg-red-700 text-white p-2 rounded-lg font-bold border border-red-400/50 shadow-md flex items-center justify-center gap-2 text-xs sm:text-sm shrink-0 transition-transform active:scale-95"
           >
             <span>🏠</span> Tornar a Casa
           </button>
 
-          <h3 className="text-yellow-400 font-bold space-font text-lg md:text-xl mb-1 drop-shadow-md text-center shrink-0">Destinacions</h3>
+          <h3 className="text-yellow-400 font-bold space-font text-sm sm:text-base md:text-lg mt-2 mb-1 drop-shadow-md text-center shrink-0 border-b border-white/10 pb-1">Destinacions</h3>
           
-          <div className="flex flex-col gap-2 pb-10">
+          <div className="flex flex-col gap-1.5 pb-20">
             {PLANETS.map(planet => (
               <button
                 key={planet.id}
                 onClick={() => onSelectPlanet(planet.id)}
-                className="bg-black/60 hover:bg-indigo-600/80 text-white p-2.5 rounded-xl text-left border border-white/10 transition-all flex items-center gap-3 group shrink-0 hover:pl-4"
+                className="bg-black/40 hover:bg-indigo-600/80 text-white p-1.5 sm:p-2 rounded-lg text-left border border-white/5 hover:border-white/30 transition-all flex items-center gap-2 sm:gap-3 group shrink-0 hover:pl-3"
               >
-                 <div className="w-5 h-5 rounded-full border border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.2)] shrink-0" style={{backgroundColor: planet.color}}></div>
-                 <span className="text-base md:text-lg font-medium">{planet.name}</span>
+                 <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-white/20 shadow-[0_0_5px_rgba(255,255,255,0.2)] shrink-0" style={{backgroundColor: planet.color}}></div>
+                 <span className="text-xs sm:text-sm font-medium truncate">{planet.name}</span>
               </button>
             ))}
           </div>
@@ -235,63 +238,64 @@ const PlanetOverlay: React.FC<Props> = ({
 
   // VISTA DE DETALLE DEL PLANETA (MENÚ DERECHO)
   return (
-    <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-4 md:p-6 lg:p-8">
-      <FullscreenButton />
+    <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-2 sm:p-4 md:p-6 overflow-hidden">
+      <FloatingFullscreenButton />
 
-      {/* Botón de volver mejorado y posicionado */}
-      <div className="pointer-events-auto absolute top-4 left-4 md:top-6 md:left-6 z-30">
+      {/* Botón de volver - Responsive placement */}
+      <div className="pointer-events-auto absolute top-3 left-3 sm:top-4 sm:left-4 z-50">
          <button 
             onClick={() => onSelectPlanet(null)}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-full border-2 border-white/30 shadow-[0_0_15px_rgba(79,70,229,0.5)] font-bold flex items-center gap-2 transition-transform hover:scale-105"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border-2 border-white/30 shadow-[0_0_15px_rgba(79,70,229,0.5)] font-bold flex items-center gap-1 sm:gap-2 transition-transform hover:scale-105 text-xs sm:text-sm md:text-base backdrop-blur-md"
         >
-            <span className="text-xl">←</span> Tornar
+            <span>←</span> <span className="hidden sm:inline">Tornar al Sistema</span><span className="sm:hidden">Enrere</span>
         </button>
       </div>
 
-      <div className="flex flex-col items-end pointer-events-none mt-12 h-full justify-center">
+      {/* Contenedor Alineado a la derecha verticalmente centrado */}
+      <div className="flex flex-col items-end pointer-events-none mt-10 sm:mt-12 h-full justify-center w-full">
         
-        {/* Contenedor con scroll para pantallas pequeñas */}
-        <div className="pointer-events-auto max-h-[85vh] overflow-y-auto no-scrollbar flex flex-col gap-4 w-full max-w-sm">
+        {/* Contenedor Planet Info (Responsive Width & Max Height) */}
+        <div className="pointer-events-auto max-h-[80vh] overflow-y-auto no-scrollbar flex flex-col gap-2 sm:gap-3 w-56 sm:w-72 md:w-96 transition-all duration-300">
             
-            <div className="bg-black/80 backdrop-blur-md p-5 rounded-2xl text-right border-r-4 shadow-[0_0_50px_rgba(0,0,0,0.6)]" style={{borderColor: selectedPlanet.color}}>
-                <h1 className="text-3xl md:text-4xl font-bold space-font mb-2" style={{color: selectedPlanet.color}}>
+            <div className="bg-black/80 backdrop-blur-md p-3 sm:p-4 md:p-5 rounded-2xl text-right border-r-4 shadow-[0_0_50px_rgba(0,0,0,0.6)]" style={{borderColor: selectedPlanet.color}}>
+                <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold space-font mb-1" style={{color: selectedPlanet.color}}>
                     {selectedPlanet.name}
                 </h1>
-                <p className="text-gray-200 text-sm md:text-base leading-relaxed border-t border-white/10 pt-3 mt-2">
+                <p className="text-gray-200 text-xs sm:text-sm md:text-base leading-relaxed border-t border-white/10 pt-2 mt-1">
                     {selectedPlanet.description}
                 </p>
             </div>
 
             {!showQuiz && !showVideo && (
-            <div className="flex flex-col gap-3 w-full">
+            <div className="flex flex-col gap-2 w-full">
                 
                 <div 
                     onClick={handleVideoClick}
-                    className="group cursor-pointer relative overflow-hidden bg-gradient-to-br from-red-600/90 via-orange-500/90 to-red-600/90 backdrop-blur border-2 border-yellow-400 hover:border-white p-4 rounded-2xl transition-all transform hover:scale-105 shadow-lg animate-[pulse_1.5s_ease-in-out_infinite]"
+                    className="group cursor-pointer relative overflow-hidden bg-gradient-to-br from-red-600/90 via-orange-500/90 to-red-600/90 backdrop-blur border-2 border-yellow-400 hover:border-white p-2.5 sm:p-3 md:p-4 rounded-xl transition-all transform hover:scale-105 shadow-lg animate-[pulse_1.5s_ease-in-out_infinite]"
                 >
-                    <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full animate-ping"></div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <span className="text-2xl md:text-3xl animate-bounce">📺</span>
-                        <h3 className="text-yellow-100 font-bold space-font text-xs md:text-sm uppercase tracking-wider drop-shadow-md">
-                            Transmissió Entrant
+                    <div className="absolute top-2 right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-ping"></div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg sm:text-xl md:text-2xl animate-bounce">📺</span>
+                        <h3 className="text-yellow-100 font-bold space-font text-[10px] sm:text-xs uppercase tracking-wider drop-shadow-md">
+                            Vídeo Secret
                         </h3>
                     </div>
-                    <p className="text-white font-bold text-sm md:text-base mb-2 drop-shadow-md leading-tight">{selectedPlanet.videoText}</p>
-                    <div className="text-xs text-yellow-200 uppercase font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform mt-2">
-                        🎥 CLICA PER VEURE VÍDEO ➜
+                    <p className="text-white font-bold text-xs sm:text-sm mb-1 drop-shadow-md leading-tight line-clamp-2">{selectedPlanet.videoText}</p>
+                    <div className="text-[9px] sm:text-[10px] text-yellow-200 uppercase font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform mt-1">
+                        CLICA PER VEURE ➜
                     </div>
                 </div>
 
                 <div 
                     onClick={handleMissionClick}
-                    className="group cursor-pointer bg-gradient-to-r from-indigo-900/90 to-blue-900/90 backdrop-blur border-2 border-indigo-500/30 hover:border-indigo-400 p-4 rounded-2xl transition-all transform hover:scale-105 hover:shadow-lg"
+                    className="group cursor-pointer bg-gradient-to-r from-indigo-900/90 to-blue-900/90 backdrop-blur border-2 border-indigo-500/30 hover:border-indigo-400 p-2.5 sm:p-3 md:p-4 rounded-xl transition-all transform hover:scale-105 hover:shadow-lg"
                 >
-                    <div className="flex items-center gap-3 mb-2">
-                        <span className="text-2xl md:text-3xl">📝</span>
-                        <h3 className="text-indigo-300 font-bold space-font text-xs md:text-sm uppercase tracking-wider">Repte de Cadet</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg sm:text-xl md:text-2xl">📝</span>
+                        <h3 className="text-indigo-300 font-bold space-font text-[10px] sm:text-xs uppercase tracking-wider">Missió</h3>
                     </div>
-                    <p className="text-white font-medium text-sm md:text-base mb-2 leading-tight">{selectedPlanet.quizText}</p>
-                    <div className="text-xs text-indigo-300 uppercase font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform mt-2">
+                    <p className="text-white font-medium text-xs sm:text-sm mb-1 leading-tight line-clamp-2">{selectedPlanet.quizText}</p>
+                    <div className="text-[9px] sm:text-[10px] text-indigo-300 uppercase font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform mt-1">
                         Iniciar Test ➜
                     </div>
                 </div>
@@ -301,29 +305,27 @@ const PlanetOverlay: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* COMPACT VIDEO PLAYER MODAL - CLICAR FUERA PARA CERRAR */}
+      {/* COMPACT VIDEO PLAYER MODAL - RESPONSIVE SIZE */}
       {showVideo && (
         <div 
-            className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md pointer-events-auto p-4 md:p-10"
-            onClick={() => setShowVideo(false)} // Clicar al fondo cierra el modal
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md pointer-events-auto p-2 sm:p-4"
+            onClick={() => setShowVideo(false)} 
         >
             <div 
-                className="relative w-full max-w-lg md:max-w-4xl flex flex-col gap-0 animate-fade-in shadow-2xl"
-                onClick={(e) => e.stopPropagation()} // Evitar cierre si clicas DENTRO del contenido
+                className="relative w-[95%] md:w-[85%] lg:w-[70%] max-w-5xl flex flex-col shadow-2xl animate-scale-in max-h-[95vh]"
+                onClick={(e) => e.stopPropagation()}
             >
-                
-                {/* Header bar with close button */}
-                <div className="bg-indigo-900/90 rounded-t-2xl p-3 md:p-4 flex justify-between items-center border-x-2 border-t-2 border-indigo-500/50">
-                    <h3 className="text-white font-bold text-base md:text-xl ml-2 truncate">🎥 {selectedPlanet.name}</h3>
+                <div className="bg-indigo-900/95 rounded-t-xl p-2 sm:p-3 flex justify-between items-center border-x-2 border-t-2 border-indigo-500/50">
+                    <h3 className="text-white font-bold text-xs sm:text-sm md:text-lg ml-2 truncate">🎥 {selectedPlanet.name}</h3>
                     <button 
                         onClick={() => setShowVideo(false)}
-                        className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors shadow-md"
+                        className="bg-red-600 hover:bg-red-500 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm transition-colors shadow-md"
                     >
                         ✕ Tancar
                     </button>
                 </div>
 
-                {/* Video Container */}
+                {/* Responsive Aspect Ratio Container */}
                 <div className="w-full aspect-video bg-black border-x-2 border-indigo-500/50 relative">
                     <iframe 
                         width="100%" 
@@ -334,82 +336,74 @@ const PlanetOverlay: React.FC<Props> = ({
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                         allowFullScreen
                         className="absolute inset-0 w-full h-full"
-                        referrerPolicy="strict-origin-when-cross-origin"
                     ></iframe>
                 </div>
                 
-                {/* Fallback Footer */}
-                <div className="bg-indigo-800/90 rounded-b-2xl p-4 border-x-2 border-b-2 border-indigo-500/50 text-center">
+                <div className="bg-indigo-800/95 rounded-b-xl p-2 sm:p-3 border-x-2 border-b-2 border-indigo-500/50 text-center">
                     <a 
                         href={videoLinks.direct} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-block bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-transform hover:scale-105 border border-white/30 text-sm md:text-base shadow-lg flex items-center justify-center gap-2 mx-auto"
+                        className="inline-block bg-green-600 hover:bg-green-500 text-white font-bold py-1.5 px-3 sm:py-2 sm:px-4 rounded-lg transition-transform hover:scale-105 border border-white/30 text-xs sm:text-sm shadow-lg"
                     >
-                        <span>▶️</span> Veure a YouTube (Pestanya Nova)
+                        Obrir a YouTube
                     </a>
                 </div>
-
             </div>
         </div>
       )}
 
-      {/* QUIZ MODAL */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      {/* QUIZ MODAL - RESPONSIVE */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 p-2 sm:p-4">
           {showQuiz && (
-              <div className="pointer-events-auto bg-indigo-950/95 backdrop-blur-xl p-6 md:p-8 rounded-3xl border-2 border-yellow-400 shadow-[0_0_100px_rgba(79,70,229,0.6)] w-full max-w-2xl m-4 relative max-h-[90vh] overflow-y-auto">
+              <div className="pointer-events-auto bg-indigo-950/95 backdrop-blur-xl p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-yellow-400 shadow-[0_0_100px_rgba(79,70,229,0.6)] w-full max-w-[550px] relative max-h-[90vh] overflow-y-auto flex flex-col">
                   <button 
                     onClick={() => setShowQuiz(false)}
-                    className="absolute top-4 right-4 bg-white/10 hover:bg-red-500/50 p-2 rounded-full text-indigo-300 hover:text-white transition-colors"
+                    className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/10 hover:bg-red-500/50 p-1.5 sm:p-2 rounded-full text-indigo-300 hover:text-white transition-colors"
                   >
-                    ✕
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
                   </button>
 
-                  <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 space-font text-yellow-400">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-center mb-1 sm:mb-2 space-font text-yellow-400">
                       Informe: {selectedPlanet.name}
                   </h2>
-                  <div className="h-1 w-32 bg-indigo-500 mx-auto rounded-full mb-4 md:mb-6"></div>
+                  <div className="h-1 w-16 sm:w-24 bg-indigo-500 mx-auto rounded-full mb-3 sm:mb-4"></div>
                   
-                  <p className="text-center text-indigo-300 mb-2 md:mb-4 text-xs md:text-sm uppercase tracking-widest">
+                  <p className="text-center text-indigo-300 mb-2 text-[10px] sm:text-xs uppercase tracking-widest">
                     Pregunta {quizIndex + 1} de {selectedPlanet.quiz.length}
                   </p>
 
-                  <div className="h-6 md:h-8 text-center mb-2">
+                  <div className="h-5 sm:h-6 mb-2 text-center">
                       {showSuccess && (
-                          <p className="text-green-400 font-bold animate-bounce text-base md:text-lg">✅ Correcte! Molt bé! 🚀</p>
+                          <p className="text-green-400 font-bold animate-bounce text-sm sm:text-base">✅ Correcte!</p>
                       )}
                       {wrongIndices.length > 0 && !showSuccess && (
-                          <p className="text-red-400 font-bold animate-pulse text-base md:text-lg">⚠️ Incorrecte. Torna-ho a provar!</p>
+                          <p className="text-red-400 font-bold animate-pulse text-sm sm:text-base">⚠️ Incorrecte</p>
                       )}
                   </div>
 
-                  <div className="mb-4 md:mb-6 text-center px-2">
-                      <p className="text-xl md:text-2xl font-bold text-white mb-2 leading-snug">
+                  <div className="mb-3 sm:mb-4 text-center px-1 sm:px-2">
+                      <p className="text-base sm:text-lg md:text-xl font-bold text-white mb-2 leading-snug">
                           {selectedPlanet.quiz[quizIndex].text}
                       </p>
                   </div>
 
-                  <div className="grid gap-3">
+                  <div className="grid gap-2 overflow-y-auto flex-1">
                       {selectedPlanet.quiz[quizIndex].options.map((option, idx) => {
                           const isWrong = wrongIndices.includes(idx);
                           const isCorrectAction = showSuccess && idx === selectedPlanet.quiz[quizIndex].correctAnswerIndex;
                           
                           let btnClass = "";
-                          
-                          if (isWrong) {
-                              btnClass = "bg-red-500/20 border-red-500 text-red-300 cursor-not-allowed";
-                          } else if (isCorrectAction) {
-                              btnClass = "bg-green-500/50 border-green-400 text-white scale-105 shadow-[0_0_20px_rgba(74,222,128,0.5)]";
-                          } else {
-                              btnClass = "bg-white/5 hover:bg-indigo-600 border-indigo-500/30 text-indigo-400 hover:text-white hover:scale-102 hover:shadow-lg hover:border-yellow-400";
-                          }
+                          if (isWrong) btnClass = "bg-red-500/20 border-red-500 text-red-300 cursor-not-allowed";
+                          else if (isCorrectAction) btnClass = "bg-green-500/50 border-green-400 text-white scale-105";
+                          else btnClass = "bg-white/5 hover:bg-indigo-600 border-indigo-500/30 text-indigo-400 hover:text-white hover:border-yellow-400";
 
                           return (
                             <button
                                 key={idx}
                                 onClick={() => handleAnswer(idx)}
                                 disabled={isWrong || showSuccess} 
-                                className={`text-left px-5 py-3 md:px-6 md:py-4 rounded-xl border transition-all text-base md:text-lg font-medium group flex items-center gap-3 ${btnClass}`}
+                                className={`text-left px-3 py-2 sm:px-4 sm:py-3 rounded-xl border transition-all text-sm sm:text-base font-medium group flex items-center gap-2 sm:gap-3 ${btnClass}`}
                             >
                                 <span className={`font-bold shrink-0 ${isWrong ? 'text-red-400' : (isCorrectAction ? 'text-white' : 'text-indigo-400 group-hover:text-white')}`}>
                                     {isWrong ? '✕' : (isCorrectAction ? '✓' : String.fromCharCode(65 + idx) + '.')}

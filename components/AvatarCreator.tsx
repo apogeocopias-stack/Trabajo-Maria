@@ -73,12 +73,12 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-900 via-purple-900 to-black p-4 relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-900 via-purple-900 to-black p-4 relative overflow-y-auto">
       
       {/* Fullscreen Toggle Button */}
       <button 
         onClick={toggleFullscreen}
-        className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-3 rounded-full border border-white/20 shadow-lg transition-all z-50"
+        className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-2 md:p-3 rounded-full border border-white/20 shadow-lg transition-all z-50"
         title={isFullscreen ? "Sortir de pantalla completa" : "Pantalla completa"}
       >
         {isFullscreen ? (
@@ -88,19 +88,19 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
         )}
       </button>
 
-      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 w-full max-w-2xl border border-white/20 shadow-2xl">
-        <h1 className="text-4xl font-bold text-center mb-2 text-yellow-300 space-font">
+      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 md:p-8 w-full max-w-2xl border border-white/20 shadow-2xl my-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-center mb-2 text-yellow-300 space-font">
           Missió Espacial: Max Aub
         </h1>
-        <p className="text-center text-indigo-200 mb-8 text-xl">
+        <p className="text-center text-indigo-200 mb-6 md:mb-8 text-lg md:text-xl">
           Configura el teu astronauta
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Form */}
           <div className="space-y-4">
             <div>
-              <label className="block text-indigo-100 mb-1">Nom</label>
+              <label className="block text-indigo-100 mb-1 text-sm md:text-base">Nom</label>
               <input
                 type="text"
                 value={formData.name}
@@ -113,7 +113,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-indigo-100 mb-1">Gènere</label>
+                <label className="block text-indigo-100 mb-1 text-sm md:text-base">Gènere</label>
                 <select
                   value={formData.gender}
                   onChange={(e) => setFormData({...formData, gender: e.target.value as 'nen'|'nena'})}
@@ -125,7 +125,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                 </select>
               </div>
               <div>
-                <label className="block text-indigo-100 mb-1">Alçada</label>
+                <label className="block text-indigo-100 mb-1 text-sm md:text-base">Alçada</label>
                 <select
                   value={formData.height}
                   onChange={(e) => setFormData({...formData, height: e.target.value})}
@@ -141,11 +141,11 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-indigo-100 mb-1">Color de cabell</label>
+                <label className="block text-indigo-100 mb-1 text-sm md:text-base">Color</label>
                 <select
                   value={formData.hairColor}
                   onChange={(e) => setFormData({...formData, hairColor: e.target.value})}
-                  className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
+                  className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white text-sm"
                   disabled={!!generatedImage}
                 >
                   <option value="ros">Ros</option>
@@ -157,11 +157,11 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                 </select>
               </div>
               <div>
-                <label className="block text-indigo-100 mb-1">Tipus de cabell</label>
+                <label className="block text-indigo-100 mb-1 text-sm md:text-base">Cabell</label>
                 <select
                   value={formData.hairType}
                   onChange={(e) => setFormData({...formData, hairType: e.target.value})}
-                  className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white"
+                  className="w-full bg-indigo-950/50 border border-indigo-400/30 rounded-xl px-4 py-2 text-white text-sm"
                   disabled={!!generatedImage}
                 >
                   <option value="llis">Llis</option>
@@ -186,7 +186,7 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
 
           {/* Preview */}
           <div className="flex flex-col items-center justify-center">
-            <div className="w-64 h-64 bg-black/30 rounded-full border-4 border-indigo-500/30 flex items-center justify-center overflow-hidden relative shadow-[0_0_50px_rgba(79,70,229,0.3)]">
+            <div className="w-48 h-48 md:w-64 md:h-64 bg-black/30 rounded-full border-4 border-indigo-500/30 flex items-center justify-center overflow-hidden relative shadow-[0_0_50px_rgba(79,70,229,0.3)]">
               {isLoading ? (
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
               ) : generatedImage ? (
@@ -211,14 +211,14 @@ const AvatarCreator: React.FC<Props> = ({ onComplete }) => {
                 
                 <button
                   onClick={handleStartAcademy}
-                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 rounded-xl hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-2 md:py-3 rounded-xl hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2 text-sm md:text-base"
                 >
                   <span>🎓</span> Sóc Cadet: Entrenament
                 </button>
 
                 <button
                   onClick={handleStartDirect}
-                  className="w-full bg-gradient-to-r from-red-500 to-orange-600 text-white font-bold py-3 rounded-xl hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-red-500 to-orange-600 text-white font-bold py-2 md:py-3 rounded-xl hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2 text-sm md:text-base"
                 >
                   <span>🚀</span> Sóc Comandant: Enlairament!
                 </button>

@@ -129,7 +129,7 @@ const PlanetOverlay: React.FC<Props> = ({
     }
   };
 
-  // --- ROBUST VIDEO SOURCE HELPER ---
+  // --- ROBUST VIDEO SOURCE HELPER (MAX COMPATIBILITY) ---
   const getVideoSrc = (input: string) => {
     if (!input) return { embed: "", direct: "" };
 
@@ -148,7 +148,6 @@ const PlanetOverlay: React.FC<Props> = ({
     let videoId = input;
     
     // Regex to extract ID from various YouTube URL formats
-    // Covers: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = input.match(regExp);
 
@@ -156,8 +155,12 @@ const PlanetOverlay: React.FC<Props> = ({
         videoId = match[2];
     }
 
-    // Use youtube-nocookie.com which is more permissive with privacy settings/errors
-    const embed = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&showinfo=0`;
+    // Use STANDARD youtube.com domain. 
+    // Ironically, youtube-nocookie often gets blocked by privacy settings more than the standard one if origin is missing.
+    // Adding 'origin' matches the request to the domain, reducing "Video unavailable" errors.
+    // Adding 'playsinline' fixes iOS fullscreen forcing.
+    const origin = window.location.origin;
+    const embed = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&origin=${origin}&playsinline=1&enablejsapi=1`;
     const direct = `https://www.youtube.com/watch?v=${videoId}`;
     
     return { embed, direct };
@@ -291,7 +294,7 @@ const PlanetOverlay: React.FC<Props> = ({
       {/* COMPACT VIDEO PLAYER MODAL */}
       {showVideo && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-auto p-4">
-            <div className="relative w-full max-w-md flex flex-col gap-0 animate-fade-in">
+            <div className="relative w-full max-w-lg flex flex-col gap-0 animate-fade-in shadow-2xl">
                 
                 {/* Header bar with close button */}
                 <div className="bg-indigo-900/90 rounded-t-2xl p-3 flex justify-between items-center border-x-2 border-t-2 border-indigo-500/50">
@@ -315,22 +318,22 @@ const PlanetOverlay: React.FC<Props> = ({
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                         allowFullScreen
                         className="absolute inset-0 w-full h-full"
-                        referrerPolicy="no-referrer"
+                        referrerPolicy="strict-origin-when-cross-origin"
                     ></iframe>
                 </div>
                 
-                {/* Fallback Footer */}
-                <div className="bg-indigo-900/90 rounded-b-2xl p-4 border-x-2 border-b-2 border-indigo-500/50 text-center">
-                    <p className="text-indigo-200 text-xs mb-2">
-                        Si tens problemes (pantalla negra o error), fes servir l'enllaç directe:
+                {/* Fallback Footer - Very visible */}
+                <div className="bg-indigo-800/90 rounded-b-2xl p-4 border-x-2 border-b-2 border-indigo-500/50 text-center">
+                    <p className="text-indigo-200 text-xs mb-3">
+                        Si la pantalla està negre o surt "No disponible", és per seguretat del navegador.
                     </p>
                     <a 
                         href={videoLinks.direct} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-block bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-4 rounded-lg transition-colors border border-white/20 text-sm"
+                        className="inline-block bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition-transform hover:scale-105 border border-white/30 text-sm shadow-lg flex items-center justify-center gap-2 mx-auto"
                     >
-                        ▶️ Obrir a YouTube
+                        <span>▶️</span> Clica aquí per veure a YouTube
                     </a>
                 </div>
 

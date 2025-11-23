@@ -20,10 +20,8 @@ const App: React.FC = () => {
     }
   });
 
-  // If we have a saved config, skip creation and go straight to Solar System
-  const [phase, setPhase] = useState<AppPhase>(() => {
-    return localStorage.getItem(STORAGE_KEY) ? AppPhase.SOLAR_SYSTEM : AppPhase.AVATAR_CREATION;
-  });
+  // Always start at AVATAR_CREATION for the presentation flow
+  const [phase, setPhase] = useState<AppPhase>(AppPhase.AVATAR_CREATION);
 
   const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);

@@ -181,31 +181,31 @@ const PlanetOverlay: React.FC<Props> = ({
         
         {/* 
           RESPONSIVE SIDEBAR:
-          w-48 on small screens
-          w-60 on tablets
-          w-72 on desktops
-          max-h-screen + overflow-y-auto ensures it fits on short projector screens
+          NARROWER VERSION as requested: w-36 sm:w-48 md:w-56
         */}
-        <div className="h-full w-48 sm:w-60 md:w-72 p-2 sm:p-3 flex flex-col gap-2 pointer-events-auto overflow-y-auto no-scrollbar bg-black/40 backdrop-blur-md border-r border-white/10 shadow-2xl transition-all duration-300">
+        <div className="h-full w-36 sm:w-48 md:w-56 p-2 sm:p-3 flex flex-col gap-2 pointer-events-auto overflow-y-auto no-scrollbar bg-black/40 backdrop-blur-md border-r border-white/10 shadow-2xl transition-all duration-300">
            
-           {/* Pilot Card (Responsive) */}
-           <div className="bg-indigo-900/80 backdrop-blur p-2 sm:p-3 rounded-xl border border-indigo-500/50 mb-1 flex items-center gap-2 sm:gap-3 shadow-lg shrink-0">
-              {avatarUrl && (
-                  <div className="relative shrink-0">
-                      <img src={avatarUrl} className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)] object-cover" alt="Avatar" />
-                  </div>
-              )}
-              <div className="flex-1 min-w-0 overflow-hidden">
-                  <p className="text-[9px] sm:text-[10px] text-indigo-300 uppercase tracking-widest font-bold truncate">Comandant</p>
-                  <p className="font-bold text-white text-xs sm:text-sm md:text-base capitalize space-font truncate">{pilotName || 'Explorant...'}</p>
-                  {/* Integrated Fullscreen Button in Sidebar (Always visible) */}
-                  <button 
-                    onClick={toggleFullscreen}
-                    className="mt-1 text-[9px] sm:text-[10px] bg-black/40 hover:bg-white/20 text-indigo-200 px-2 py-0.5 rounded flex items-center gap-1 transition-colors w-full justify-center sm:justify-start"
-                  >
-                     {isFullscreen ? '✕ Sortir' : '⛶ Pantalla completa'}
-                  </button>
+           {/* Pilot Card (BIGGER & MORE PADDING) */}
+           <div className="bg-indigo-900/90 backdrop-blur p-3 sm:p-4 mb-2 rounded-xl border border-indigo-500/50 flex flex-col gap-2 shadow-lg shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3">
+                {avatarUrl && (
+                    <div className="relative shrink-0">
+                        <img src={avatarUrl} className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)] object-cover" alt="Avatar" />
+                    </div>
+                )}
+                <div className="flex-1 min-w-0 overflow-hidden">
+                    <p className="text-[10px] sm:text-xs text-indigo-300 uppercase tracking-widest font-bold truncate">Comandant</p>
+                    <p className="font-bold text-white text-sm sm:text-base md:text-lg capitalize space-font truncate">{pilotName || 'Explorant...'}</p>
+                </div>
               </div>
+              
+              {/* Integrated Fullscreen Button in Sidebar (Always visible) */}
+              <button 
+                onClick={toggleFullscreen}
+                className="mt-1 text-xs bg-black/40 hover:bg-white/20 text-indigo-200 px-2 py-1.5 rounded flex items-center justify-center gap-1 transition-colors w-full font-medium"
+              >
+                  {isFullscreen ? '✕ Sortir Pantalla' : '⛶ Pantalla completa'}
+              </button>
            </div>
 
           <button 

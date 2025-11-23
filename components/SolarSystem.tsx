@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect, useMemo, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, Stars, Html, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 import { PLANETS } from '../constants';
@@ -476,13 +476,13 @@ const PlanetMesh: React.FC<PlanetMeshProps> = ({ data, isSelected, isAnySelected
             {/* Main Planet Body */}
             <mesh 
                 ref={meshRef} 
-                onClick={(e) => { e.stopPropagation(); onClick(data.id); }}
-                onPointerOver={(e) => { 
+                onClick={(e: any) => { e.stopPropagation(); onClick(data.id); }}
+                onPointerOver={(e: any) => { 
                     e.stopPropagation();
                     document.body.style.cursor = 'pointer';
                     setHovered(true);
                 }}
-                onPointerOut={(e) => { 
+                onPointerOut={(e: any) => { 
                     document.body.style.cursor = 'auto';
                     setHovered(false);
                 }}

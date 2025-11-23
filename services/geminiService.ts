@@ -2,6 +2,8 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import { AvatarConfig } from '../types';
 
+declare var process: any;
+
 // Safely access process.env to avoid ReferenceError in some browser environments
 const apiKey = (typeof process !== 'undefined' && process.env && process.env.API_KEY) || '';
 

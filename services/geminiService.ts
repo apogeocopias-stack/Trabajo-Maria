@@ -1,11 +1,11 @@
-
 import { GoogleGenAI, Modality } from "@google/genai";
 import { AvatarConfig } from '../types';
 
 declare var process: any;
 
-// Safely access process.env to avoid ReferenceError in some browser environments
-const apiKey = (typeof process !== 'undefined' && process.env && process.env.API_KEY) || '';
+// Vite sustituirá 'process.env.API_KEY' por el string de tu clave al compilar.
+// Usamos una asignación directa para evitar errores de comprobación en el navegador.
+const apiKey = process.env.API_KEY || '';
 
 const ai = new GoogleGenAI({ apiKey });
 

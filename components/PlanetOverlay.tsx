@@ -155,12 +155,11 @@ const PlanetOverlay: React.FC<Props> = ({
         videoId = match[2];
     }
 
-    // Use STANDARD youtube.com domain. 
-    // Ironically, youtube-nocookie often gets blocked by privacy settings more than the standard one if origin is missing.
-    // Adding 'origin' matches the request to the domain, reducing "Video unavailable" errors.
-    // Adding 'playsinline' fixes iOS fullscreen forcing.
-    const origin = window.location.origin;
-    const embed = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&origin=${origin}&playsinline=1&enablejsapi=1`;
+    // Use STANDARD youtube.com domain for max desktop compatibility.
+    // origin: Vital for desktop security checks.
+    // widget_referrer: Helps extra validation.
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const embed = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&origin=${origin}&widget_referrer=${origin}&playsinline=1&enablejsapi=1`;
     const direct = `https://www.youtube.com/watch?v=${videoId}`;
     
     return { embed, direct };
@@ -293,21 +292,21 @@ const PlanetOverlay: React.FC<Props> = ({
 
       {/* COMPACT VIDEO PLAYER MODAL */}
       {showVideo && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-auto p-4">
-            <div className="relative w-full max-w-lg flex flex-col gap-0 animate-fade-in shadow-2xl">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md pointer-events-auto p-4 md:p-10">
+            <div className="relative w-full max-w-lg md:max-w-4xl flex flex-col gap-0 animate-fade-in shadow-2xl">
                 
                 {/* Header bar with close button */}
-                <div className="bg-indigo-900/90 rounded-t-2xl p-3 flex justify-between items-center border-x-2 border-t-2 border-indigo-500/50">
-                    <h3 className="text-white font-bold ml-2">🎥 Transmissió de {selectedPlanet.name}</h3>
+                <div className="bg-indigo-900/90 rounded-t-2xl p-4 flex justify-between items-center border-x-2 border-t-2 border-indigo-500/50">
+                    <h3 className="text-white font-bold text-lg md:text-xl ml-2">🎥 Transmissió de {selectedPlanet.name}</h3>
                     <button 
                         onClick={() => setShowVideo(false)}
-                        className="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg font-bold text-sm transition-colors"
+                        className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors"
                     >
                         ✕ Tancar
                     </button>
                 </div>
 
-                {/* Video Container */}
+                {/* Video Container - Bigger on desktop */}
                 <div className="w-full aspect-video bg-black border-x-2 border-indigo-500/50 relative">
                     <iframe 
                         width="100%" 
@@ -324,16 +323,16 @@ const PlanetOverlay: React.FC<Props> = ({
                 
                 {/* Fallback Footer - Very visible */}
                 <div className="bg-indigo-800/90 rounded-b-2xl p-4 border-x-2 border-b-2 border-indigo-500/50 text-center">
-                    <p className="text-indigo-200 text-xs mb-3">
-                        Si la pantalla està negre o surt "No disponible", és per seguretat del navegador.
+                    <p className="text-indigo-200 text-xs md:text-sm mb-3">
+                        Si la pantalla està negre (bloqueig de seguretat o adblock), fes servir el botó verd:
                     </p>
                     <a 
                         href={videoLinks.direct} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-block bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition-transform hover:scale-105 border border-white/30 text-sm shadow-lg flex items-center justify-center gap-2 mx-auto"
+                        className="inline-block bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-lg transition-transform hover:scale-105 border border-white/30 text-base shadow-lg flex items-center justify-center gap-2 mx-auto"
                     >
-                        <span>▶️</span> Clica aquí per veure a YouTube
+                        <span>▶️</span> Veure a YouTube (Pestanya Nova)
                     </a>
                 </div>
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Question, QuizResult } from '../types';
 import { PLANETS } from '../constants';
@@ -76,19 +77,12 @@ const PlanetOverlay: React.FC<Props> = ({
   const finishQuiz = (finalResults: QuizResult[]) => {
       if (!selectedPlanet) return;
 
-      const correctFirstTry = finalResults.filter(r => r.planetId === selectedPlanet.id && r.correct).length;
-      const total = selectedPlanet.quiz.length;
-      
-      let message = "";
-      if (correctFirstTry === total) message = "Perfecte! Ets un expert! 🌟";
-      else if (correctFirstTry >= total / 2) message = "Molt bé! Missió complerta. 👍";
-      else message = "Bona feina! Has après moltes coses noves.";
-
+      // Removed alert to prevent exiting fullscreen.
+      // Wait a moment for the user to see the last success message, then return to solar system.
       setTimeout(() => {
-        alert(`${message}\nHas encertat a la primera: ${correctFirstTry} de ${total} preguntes.`);
         setShowQuiz(false);
-        onSelectPlanet(null); 
-      }, 500);
+        onSelectPlanet(null); // Return to Solar System view
+      }, 1000);
   };
 
   const handleAnswer = (optionIndex: number) => {

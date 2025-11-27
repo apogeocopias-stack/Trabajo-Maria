@@ -6,46 +6,6 @@ import * as THREE from 'three';
 import { PLANETS } from '../constants';
 import { PlanetData } from '../types';
 
-// Add type definitions for React Three Fiber elements
-// We augment both global JSX and React.JSX to ensure compatibility with various TS/React versions
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      group: any;
-      mesh: any;
-      sphereGeometry: any;
-      boxGeometry: any;
-      cylinderGeometry: any;
-      coneGeometry: any;
-      meshStandardMaterial: any;
-      meshBasicMaterial: any;
-      ringGeometry: any;
-      ambientLight: any;
-      pointLight: any;
-      color: any;
-    }
-  }
-  
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        group: any;
-        mesh: any;
-        sphereGeometry: any;
-        boxGeometry: any;
-        cylinderGeometry: any;
-        coneGeometry: any;
-        meshStandardMaterial: any;
-        meshBasicMaterial: any;
-        ringGeometry: any;
-        ambientLight: any;
-        pointLight: any;
-        color: any;
-      }
-    }
-  }
-}
-
 interface Props {
   selectedPlanetId: string | null;
   onPlanetSelect: (id: string) => void;
